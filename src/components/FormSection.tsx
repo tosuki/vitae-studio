@@ -1,6 +1,14 @@
+import { ReactNode } from 'react';
 
+interface FormSectionProps {
+  title: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+  icon?: ReactNode;
+}
 
-export default function FormSection({ title, isOpen, onToggle, children, icon }) {
+export default function FormSection({ title, isOpen, onToggle, children, icon }: FormSectionProps) {
   return (
     <div className={`form-section ${isOpen ? 'is-open' : ''}`}>
       <button 

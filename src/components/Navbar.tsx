@@ -1,17 +1,30 @@
-import { useRef } from 'react';
+import { useRef, ChangeEvent } from 'react';
+import { CVData } from '../types/cv';
 
-export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJson, onPrint, onAlert }) {
-  const fileInputRef = useRef(null);
+interface NavbarProps {
+  onLoadSample: () => void;
+  onClear: () => void;
+  onExportJson: () => void;
+  onImportJson: (data: CVData) => void;
+  onPrint: () => void;
+  onAlert: (title: string, message: string) => void;
+}
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJson, onPrint, onAlert }: NavbarProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const data = JSON.parse(e.target.result);
-        onImportJson(data);
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          const data = JSON.parse(result) as CVData;
+          onImportJson(data);
+        }
         // Reset file input value so same file can be selected again
         event.target.value = '';
       } catch {
@@ -72,7 +85,7 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
           <button 
             type="button" 
             className="btn btn-secondary" 
-            onClick={() => fileInputRef.current.click()}
+            onClick={() => fileInputRef.current?.click()}
             title="Importar dados de um arquivo JSON"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

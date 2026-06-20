@@ -1,11 +1,17 @@
+interface ModalProps {
+  title: string;
+  message: string;
+  type: 'confirm' | 'alert';
+  onClose: () => void;
+  onConfirm?: () => void;
+}
 
-
-export default function Modal({ title, message, type, onClose, onConfirm }) {
+export default function Modal({ title, message, type, onClose, onConfirm }: ModalProps) {
   return (
     <div className="modal-backdrop no-print" onClick={onClose}>
       <div 
         className="modal-container" 
-        onClick={(e) => e.stopPropagation()} /* Prevents closing when clicking inside modal */
+        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"

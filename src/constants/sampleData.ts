@@ -1,4 +1,6 @@
-export const sampleData = {
+import { CVData } from '../types/cv';
+
+export const sampleData: CVData = {
   personal: {
     fullName: "Gabriel Silva Santos",
     title: "Desenvolvedor Frontend Senior",
@@ -16,7 +18,7 @@ export const sampleData = {
       role: "Desenvolvedor Frontend Senior",
       location: "São Paulo, SP (Híbrido)",
       startDate: "2023-03",
-      endDate: "", // Vazio significa 'Presente' ou 'Atual'
+      endDate: "",
       description: "Liderança técnica no desenvolvimento da nova plataforma SaaS utilizando React 18 e Next.js. Otimização de performance de renderização web, resultando em 40% de redução no First Contentful Paint. Criação e manutenção do Design System interno em conjunto com o time de UX/UI, economizando tempo de desenvolvimento dos times em mais de 30%."
     },
     {
@@ -87,9 +89,9 @@ export const sampleData = {
     { id: "lang-3", name: "Espanhol", level: "Básico" }
   ],
   style: {
-    theme: "modern", // modern, classic, minimalist
-    fontFamily: "inter", // inter, lora, roboto
-    accentColor: "#7c3aed", // violet
-    spacing: "normal" // compact, normal, relaxed
+    theme: "modern",
+    fontFamily: "inter",
+    accentColor: "#7c3aed",
+    spacing: "normal"
   }
 };
