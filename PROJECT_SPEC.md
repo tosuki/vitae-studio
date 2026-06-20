@@ -1,0 +1,2 @@
+# CV
+Esse é um projeto visando automatizar a construção de curriculos no padrão cronologico inverso. A ideia é que tenha uma interface gráfica responsiva que possibilite adicionar ou remover especificações do curriculo. O layout deve conter seções como experiencia profissional, experiencia academica, certificados (onde deve ter informações da organização que emitiu, quando foi emitido e o nome), uma seção de objetivo, um nome destacado. A ideia é que seja uma interface interativa pra construir esse tipo de curriculo. 
