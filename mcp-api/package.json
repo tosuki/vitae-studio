@@ -19,6 +19,7 @@
     "bullmq": "^5.79.0",
     "dotenv": "^17.4.2",
     "fastify": "^5.8.5",
+    "fastify-type-provider-zod": "^6.1.0",
     "puppeteer": "^25.1.0",
     "puppeteer-cluster": "^0.25.0",
     "puppeteer-extra": "^3.3.6",

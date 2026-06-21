@@ -3,6 +3,7 @@ import { Cluster, TaskFunction } from "puppeteer-cluster"
 
 import PuppeteerExtra from "puppeteer-extra"
 import StealthMode from "puppeteer-extra-plugin-stealth"
+import { BrowserNotStartedError } from "../error/error"
 
 export type BrowserClusterConfiguration = { 
     launch?: LaunchOptions
@@ -87,7 +88,7 @@ export class BrowserCluster {
         task?: TaskFunction<TData, TReturn>
     ): Promise<TReturn> {
         if (this.cluster === null) {
-            throw new Error("Browser cluster not started. Please call start() first.")
+            throw new BrowserNotStartedError()
         }
         
         return this.cluster.execute(data, task) as Promise<TReturn>

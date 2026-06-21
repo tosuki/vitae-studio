@@ -2,11 +2,20 @@ import { Queue, QueueEvents } from "bullmq"
 import { Job } from "../model/job"
 import { v4 as uuid } from "uuid"
 import { env } from "../env"
+import { UnsupportedJobTypeError } from "../error/error"
+import { logger } from "../logger/logger"
+
+export type GetTaskOpts = {
+    id?: string
+    limit?: number
+    offset?: number,
+    type?: "all" | "details" | "gemini"
+}
 
 // Configuração centralizada com limpeza automática de tarefas antigas no Redis
 export const queueConfig = { 
     connection: {
-        port: env.REDIS_PORT,
+        port: Number(env.REDIS_PORT),
         host: env.REDIS_HOST
     },
     defaultJobOptions: {
@@ -47,30 +56,33 @@ export class QueueManager {
     private geminiEvents = new QueueEvents(env.GEMINI_QUEUE_NAME, { connection: queueConfig.connection })
     
     constructor() {
+        logger.info(`[QueueManager] Inicializando fila de Detalhes de Vagas (${env.JOB_VACANCY_DETAILS_QUEUE}) e eventos do Redis...`)
+        logger.info(`[QueueManager] Inicializando fila do Gemini (${env.GEMINI_QUEUE_NAME}) e eventos do Redis...`)
         this.setupEventsListeners()
+        logger.info("[QueueManager] Filas e ouvintes de eventos inicializados com sucesso.")
     }
 
     private setupEventsListeners() {
         // Escuta de eventos para a fila de Scraping
         this.jobVacancyDetailsEvents.on("completed", ({ jobId }) => {
-            console.log(`[QueueEvents:Details] Job ${jobId} concluído com sucesso.`)
+            logger.info(`[QueueEvents:Details] Job ${jobId} concluído com sucesso.`)
         })
         this.jobVacancyDetailsEvents.on("failed", ({ jobId, failedReason }) => {
-            console.error(`[QueueEvents:Details] Job ${jobId} falhou. Motivo: ${failedReason}`)
+            logger.error(`[QueueEvents:Details] Job ${jobId} falhou. Motivo: ${failedReason}`)
         })
         this.jobVacancyDetailsEvents.on("progress", ({ jobId, data }) => {
-            console.log(`[QueueEvents:Details] Progresso do Job ${jobId}: ${data}%`)
+            logger.info(`[QueueEvents:Details] Progresso do Job ${jobId}: ${data}%`)
         })
 
         // Escuta de eventos para a fila de IA (Gemini)
         this.geminiEvents.on("completed", ({ jobId }) => {
-            console.log(`[QueueEvents:Gemini] Job ${jobId} concluído com sucesso.`)
+            logger.info(`[QueueEvents:Gemini] Job ${jobId} concluído com sucesso.`)
         })
         this.geminiEvents.on("failed", ({ jobId, failedReason }) => {
-            console.error(`[QueueEvents:Gemini] Job ${jobId} falhou. Motivo: ${failedReason}`)
+            logger.error(`[QueueEvents:Gemini] Job ${jobId} falhou. Motivo: ${failedReason}`)
         })
         this.geminiEvents.on("progress", ({ jobId, data }) => {
-            console.log(`[QueueEvents:Gemini] Progresso do Job ${jobId}: ${data}%`)
+            logger.info(`[QueueEvents:Gemini] Progresso do Job ${jobId}: ${data}%`)
         })
     }
 
@@ -106,13 +118,51 @@ export class QueueManager {
      * }
      * ```
      */
-    async getTask(id: string) {
-        const [geminiTask, jobVacancyDetailsTask] = await Promise.all([
-            this.getGeminiQueueTask(id),
-            this.getJobVacancyDetailsQueueTask(id)
+    async getTask(opts: GetTaskOpts = {
+        limit: 10,
+        offset: 0,
+        type: "all"
+    }) {
+        if (opts.id) {
+            return await this.getTaskById(opts.id)
+        }
+
+        switch (opts.type) {
+            case "all":
+                const [jobVacancyJobs, geminiJobs] = await Promise.all([
+                    this.getAllGeminiJobs(opts),
+                    this.getAllJobVacancyJobs(opts)
+                ])
+
+                return [...jobVacancyJobs, ...geminiJobs]
+            case "details":
+                return await this.getAllJobVacancyJobs(opts)
+            case "gemini":
+                return await this.getAllGeminiJobs(opts)
+            default:
+                throw new UnsupportedJobTypeError(`Type ${opts.type} not supported`)
+        }
+    }
+
+    async getAllGeminiJobs(opts: Pick<GetTaskOpts, "limit" | "offset"> = { limit: 10, offset: 0 }) {
+        const jobs = await this.geminiQueue.getJobs()
+
+        return jobs.slice(opts.offset!*opts.limit!, opts.limit!)
+    }
+
+    async getAllJobVacancyJobs(opts: Pick<GetTaskOpts, "limit" | "offset"> = { limit: 10, offset: 0 }) {
+        const jobs = await this.jobVacancyDetailsQueue.getJobs()
+
+        return jobs.slice(opts.offset!*opts.limit!, opts.limit!)
+    }
+
+    async getTaskById(id: string) {
+        const [geminiTask, jobVacancyTask] = await Promise.all([
+            this.geminiQueue.getJob(id),
+            this.jobVacancyDetailsQueue.getJob(id)
         ])
-        
-        return geminiTask || jobVacancyDetailsTask
+
+        return geminiTask || jobVacancyTask
     }
 
     /**
@@ -150,7 +200,7 @@ export class QueueManager {
                 await this.geminiQueue.add(job.id, job)
                 break
             default:
-                throw new Error(`Job type ${jobData.type} not supported`)
+                throw new UnsupportedJobTypeError(`Job type ${jobData.type} not supported`)
         }
 
         return job
@@ -175,6 +225,6 @@ export class QueueManager {
             this.jobVacancyDetailsEvents.close(),
             this.geminiEvents.close()
         ])
-        console.log("[QueueManager] Todas as filas e eventos encerrados.")
+        logger.info("[QueueManager] Todas as filas e eventos encerrados.")
     }
 }
