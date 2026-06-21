@@ -13,6 +13,7 @@
     "allowJs": true,
     "jsx": "preserve",
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "module": "ESNext",
     "forceConsistentCasingInFileNames": true,
     "typeRoots": [
