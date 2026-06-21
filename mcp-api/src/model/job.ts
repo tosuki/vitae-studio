@@ -1,7 +1,7 @@
 import { Vacancy } from "./vacancy"
 
 export type JobType = 
-    | { type: "details", url: string, vacancy?: never }
+    | { type: "details", url: string, vacancy?: Vacancy }
     | { type: "gemini", vacancy: Vacancy, url?: never }
 
 export type JobState =

@@ -88,10 +88,21 @@ Implementado no arquivo [index.ts](file:///Users/tosuki/Documents/Projects/cv/mc
 2. **Desligamento de Singletons**: O método `shutdownInstances()` em [factory/index.ts](file:///Users/tosuki/Documents/Projects/cv/mcp-api/src/factory/index.ts) encerra suavemente todos os recursos alocados (desativa os workers, encerra as conexões do BullMQ com o Redis e fecha o cluster do navegador Puppeteer).
 3. **Timeout de Segurança**: Há um timer de 10s que força `process.exit(1)` caso o encerramento trave por motivos externos.
 
+### E. Scraping do LinkedIn com Cookies e Puppeteer Stealth
+Implementado em [vacancy.ts](file:///Users/tosuki/Documents/Projects/cv/mcp-api/src/handlers/vacancy.ts) a extração automatizada de vagas do LinkedIn:
+* **Autenticação**: Carrega dinamicamente o arquivo `cookies.json` na raiz do projeto, mapeia os campos (como `expirationDate` para `expires` e `no_restriction` para `None` na política `sameSite`) para a especificação do Puppeteer e injeta os cookies na aba ativa antes da navegação.
+* **Navegação Resiliente**: Como as páginas do LinkedIn possuem rotinas complexas de rastreamento e telemetria que muitas vezes causam timeouts com `waitUntil: 'networkidle2'`, a navegação foi configurada com `domcontentloaded` e encapsulada em bloco try/catch com timeout de 60s, seguida por uma espera estática de 5 segundos (`setTimeout`) para estabilização dos elementos dinâmicos.
+* **Seletores Robustos e Múltiplos**: A extração em `page.evaluate()` utiliza seletores redundantes e resilientes a modificações de DOM do LinkedIn:
+  * **Título**: `h1.t-24.t-bold` ou `.job-details-jobs-unified-top-card__title`
+  * **Empresa**: `.job-details-jobs-unified-top-card__company-name a` ou `.jobs-unified-top-card__company-name a`
+  * **Descrição**: `.jobs-description__content` ou `.jobs-description`
+* **Transição de Tipagem**: Para permitir a anexação da vaga após o processamento, atualizamos a definição do tipo `JobType` em [job.ts](file:///Users/tosuki/Documents/Projects/cv/mcp-api/src/model/job.ts), permitindo o campo `vacancy?: Vacancy` sob o tipo de job `"details"`.
+
 ---
 
 ## 4. Próximos Passos de Desenvolvimento
 
 Se o contexto expirar, considere focar nos seguintes tópicos:
-1. **Implementação de Testes Automatizados**: Criar testes unitários para os handlers em `src/handlers/` simulando o comportamento de navegação (`BrowserCluster`) e a API do Gemini.
-2. **Persistência de Dados**: O estado do job é mantido temporariamente no Redis pelo BullMQ. Adicionar persistência permanente (ex: PostgreSQL/Prisma) no encerramento de jobs com sucesso/falha pode ser benéfico.
+1. **Implementação do GeminiHandler**: Implementar a análise e otimização de perfil no `GeminiHandler` usando a API do Gemini.
+2. **Implementação de Testes Automatizados**: Criar testes unitários para os handlers em `src/handlers/` simulando o comportamento de navegação (`BrowserCluster`) e a API do Gemini.
+3. **Persistência de Dados**: O estado do job é mantido temporariamente no Redis pelo BullMQ. Adicionar persistência permanente (ex: PostgreSQL/Prisma) no encerramento de jobs com sucesso/falha pode ser benéfico.
