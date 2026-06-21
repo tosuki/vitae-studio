@@ -37,7 +37,11 @@ export class BrowserCluster {
     private cluster: Cluster | null = null
     private opts: BrowserClusterConfiguration
 
-    constructor(opts: BrowserClusterConfiguration = {}) {
+    constructor(opts: BrowserClusterConfiguration = {
+        launch: {
+            headless: false
+        }
+    }) {
         this.opts = opts
     }
 
