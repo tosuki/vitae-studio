@@ -5,15 +5,38 @@ import { queueConfig } from "./queue"
 import { Job as ModelJob } from "../model/job"
 import { logger } from "../logger/logger"
 
+/**
+ * Gerencia a execução de tarefas assíncronas consumindo filas do BullMQ.
+ * Inicializa instâncias separadas de Workers para processamento de scraping e análises de IA.
+ * 
+ * @example
+ * ```typescript
+ * const worker = new QueueWorker(geminiHandler, jobVacancyHandler);
+ * worker.startWorker();
+ * ```
+ */
 export class QueueWorker {
     private detailsWorkerInstance: Worker | null = null
     private geminiWorkerInstance: Worker | null = null
 
+    /**
+     * Cria um QueueWorker.
+     * @param geminiWorker Processador responsável pela otimização e IA (Gemini).
+     * @param jobVacancyWorker Processador responsável por buscar detalhes de vagas (Scraper).
+     */
     constructor(
         private geminiWorker: Handler,
         private jobVacancyWorker: Handler
     ) {}
 
+    /**
+     * Inicializa os workers e começa a escutar as filas no Redis correspondentes.
+     * 
+     * @example
+     * ```typescript
+     * worker.startWorker();
+     * ```
+     */
     startWorker() {
         logger.info("[QueueWorker] Inicializando processadores (Workers) das filas no Redis...")
 
@@ -69,6 +92,14 @@ export class QueueWorker {
         logger.info("[QueueWorker] Todos os Workers foram carregados e iniciados com sucesso.")
     }
 
+    /**
+     * Encerra de forma suave a escuta dos workers, aguardando a conclusão das tarefas ativas.
+     * 
+     * @example
+     * ```typescript
+     * await worker.close();
+     * ```
+     */
     async close() {
         logger.info("[QueueWorker] Finalizando escuta dos workers...")
         await Promise.all([

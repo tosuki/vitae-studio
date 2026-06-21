@@ -1,6 +1,21 @@
 import { FastifyRequest, FastifyReply } from "fastify"
 import { CoreError } from "../error/error"
 
+/**
+ * Manipulador global de exceções da API Fastify.
+ * Intercepta erros ocorridos nos controladores ou middlewares, mapeia exceções
+ * customizadas do tipo `CoreError` para seus respectivos status HTTP e formata
+ * as respostas JSON e logs de telemetria correspondentes.
+ * 
+ * @param error Exceção capturada pelo Fastify.
+ * @param request Objeto da requisição Fastify correspondente.
+ * @param reply Objeto de resposta (reply) Fastify correspondente.
+ * 
+ * @example
+ * ```typescript
+ * fastify.setErrorHandler(errorHandler.handle)
+ * ```
+ */
 const handle = (error: unknown, request: FastifyRequest, reply: FastifyReply) => {
     // 1. Tratamento de CoreError e subclasses
     if (error instanceof CoreError) {

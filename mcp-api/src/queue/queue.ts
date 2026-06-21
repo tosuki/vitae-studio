@@ -5,14 +5,23 @@ import { env } from "../env"
 import { UnsupportedJobTypeError } from "../error/error"
 import { logger } from "../logger/logger"
 
+/**
+ * Opções de paginação e filtragem ao recuperar tarefas das filas.
+ */
 export type GetTaskOpts = {
+    /** ID único da tarefa (opcional). */
     id?: string
+    /** Limite máximo de registros a retornar por fila. */
     limit?: number
-    offset?: number,
+    /** Deslocamento (offset) para a paginação das filas. */
+    offset?: number
+    /** Filtrar por tipo específico de fila ou buscar em todas ("all"). */
     type?: "all" | "details" | "gemini"
 }
 
-// Configuração centralizada com limpeza automática de tarefas antigas no Redis
+/**
+ * Configuração de conexão com o Redis e políticas padrão para Jobs do BullMQ.
+ */
 export const queueConfig = { 
     connection: {
         port: Number(env.REDIS_PORT),
@@ -44,7 +53,7 @@ export const queueConfig = {
  *     state: "IDLE"
  * });
  * 
- * console.log(`Tarefa criada com ID: ${job.id}`);
+ * logger.info(`Tarefa criada com ID: ${job.id}`);
  * ```
  */
 export class QueueManager {
@@ -62,6 +71,10 @@ export class QueueManager {
         logger.info("[QueueManager] Filas e ouvintes de eventos inicializados com sucesso.")
     }
 
+    /**
+     * Vincula ouvintes de eventos para monitorar progresso, sucesso e falhas
+     * em tempo real nas filas de Scraping e IA (Gemini).
+     */
     private setupEventsListeners() {
         // Escuta de eventos para a fila de Scraping
         this.jobVacancyDetailsEvents.on("completed", ({ jobId }) => {
@@ -86,35 +99,49 @@ export class QueueManager {
         })
     }
 
+    /**
+     * Obtém um Job específico da fila do Gemini.
+     * @param id ID único da tarefa.
+     */
     getGeminiQueueTask(id: string) {
         return this.geminiQueue.getJob(id)
     }
 
+    /**
+     * Obtém um Job específico da fila de scraping de vagas.
+     * @param id ID único da tarefa.
+     */
     getJobVacancyDetailsQueueTask(id: string) {
         return this.jobVacancyDetailsQueue.getJob(id)
     }
 
+    /**
+     * Retorna o escutador de eventos nativo da fila Gemini.
+     */
     getGeminiEvents() {
         return this.geminiEvents
     }
 
+    /**
+     * Retorna o escutador de eventos nativo da fila de scraping.
+     */
     getJobVacancyDetailsEvents() {
         return this.jobVacancyDetailsEvents
     }
 
     /**
      * Recupera o status e resultado de um Job específico buscando de forma
-     * concorrente em todas as filas registradas do Redis.
+     * concorrente em todas as filas registradas do Redis, ou pagina as listas de Jobs.
      * 
-     * @param id ID único da tarefa (UUID)
-     * @returns O Job do BullMQ correspondente ou null se não encontrado
+     * @param opts Opções de busca (ID, limites, paginação, tipo).
+     * @returns O Job correspondente, ou lista de Jobs paginados.
      * 
      * @example
      * ```typescript
-     * const job = await queueManager.getTask("job-uuid-aqui");
-     * if (job) {
+     * const job = await queueManager.getTask({ id: "job-uuid-aqui" });
+     * if (job && !Array.isArray(job)) {
      *     const state = await job.getState();
-     *     console.log(`Status: ${state}, Progresso: ${job.progress}%`);
+     *     logger.info(`Status: ${state}, Progresso: ${job.progress}%`);
      * }
      * ```
      */
@@ -144,18 +171,30 @@ export class QueueManager {
         }
     }
 
+    /**
+     * Lista jobs paginados da fila do Gemini.
+     * @param opts Opções de limites e deslocamento.
+     */
     async getAllGeminiJobs(opts: Pick<GetTaskOpts, "limit" | "offset"> = { limit: 10, offset: 0 }) {
         const jobs = await this.geminiQueue.getJobs()
 
         return jobs.slice(opts.offset!*opts.limit!, opts.limit!)
     }
 
+    /**
+     * Lista jobs paginados da fila de scraping de vagas.
+     * @param opts Opções de limites e deslocamento.
+     */
     async getAllJobVacancyJobs(opts: Pick<GetTaskOpts, "limit" | "offset"> = { limit: 10, offset: 0 }) {
         const jobs = await this.jobVacancyDetailsQueue.getJobs()
 
         return jobs.slice(opts.offset!*opts.limit!, opts.limit!)
     }
 
+    /**
+     * Busca por ID em ambas as filas concorrentemente.
+     * @param id ID único da tarefa.
+     */
     async getTaskById(id: string) {
         const [geminiTask, jobVacancyTask] = await Promise.all([
             this.geminiQueue.getJob(id),
@@ -176,7 +215,7 @@ export class QueueManager {
      * ```typescript
      * const job = await queueManager.createTask({
      *     type: "gemini",
-     *     vacancy: { title: "Dev React", description: "Requisitos..." },
+     *     vacancy: { name: "Dev React", description: "Requisitos...", requirements: [], createdAt: Date.now(), createdBy: "user" },
      *     state: "IDLE"
      * });
      * ```
