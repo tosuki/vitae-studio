@@ -8,7 +8,7 @@ const envSchema = z.object({
     REDIS_PORT: z.number().optional().default(6379),
 
     GEMINI_QUEUE_NAME: z.string().optional().default("GEMINI_QUEUE"),
-    PUPPETEER_QUEUE_NAME: z.string().optional().default("PUPPETEER")
+    JOB_VACANCY_DETAILS_QUEUE: z.string().optional().default("JOB_VACANCY_DETAILS_QUEUE")
 })
 
 export const env = envSchema.parse(process.env)

@@ -12,6 +12,7 @@ export type JobState =
 
 export type Job = JobState & JobType & {
     id: string
+    progress: number
     createdAt: number
     updatedAt: number
 }
