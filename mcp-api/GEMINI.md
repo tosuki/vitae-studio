@@ -94,5 +94,4 @@ Implementado no arquivo [index.ts](file:///Users/tosuki/Documents/Projects/cv/mc
 
 Se o contexto expirar, considere focar nos seguintes tópicos:
 1. **Implementação de Testes Automatizados**: Criar testes unitários para os handlers em `src/handlers/` simulando o comportamento de navegação (`BrowserCluster`) e a API do Gemini.
-2. **Integração dos Workers no Startup**: O index.ts atualmente inicia o servidor HTTP, mas não chama explicitamente `getWorkerManagerInstance().startWorker()`. Verifique se o fluxo exige que os Workers rodem sob o mesmo processo ou se serão iniciados em uma instância separada de container.
-3. **Persistência de Dados**: O estado do job é mantido temporariamente no Redis pelo BullMQ. Adicionar persistência persistente (ex: PostgreSQL/Prisma) no encerramento de jobs com sucesso/falha pode ser benéfico.
+2. **Persistência de Dados**: O estado do job é mantido temporariamente no Redis pelo BullMQ. Adicionar persistência permanente (ex: PostgreSQL/Prisma) no encerramento de jobs com sucesso/falha pode ser benéfico.

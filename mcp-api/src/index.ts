@@ -1,9 +1,14 @@
 import "dotenv/config"
 import app from "./http/server"
+
 import { env } from "./env"
-import { shutdownInstances } from "./factory"
+import { getWorkerManagerInstance, shutdownInstances } from "./factory"
 import { logger } from "./logger/logger"
 
+
+const worker = getWorkerManagerInstance()
+
+worker.startWorker()
 app.listen({
     port: Number(env.SERVER_PORT),
     host: env.SERVER_HOST
