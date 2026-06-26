@@ -4,7 +4,6 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "dev:debug": "LOG_LEVEL=debug tsx src/index.ts",

@@ -15,7 +15,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "nodenext",
-    "module": "ESNext",
+    "module": "nodenext",
     "forceConsistentCasingInFileNames": true,
     "typeRoots": [
       "src/types",
