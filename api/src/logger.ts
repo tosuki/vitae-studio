@@ -1,12 +1,15 @@
 import pino from "pino"
 
-export const loggerTransportOptions = {
-    target: 'pino-pretty',
-    options: {
-        colorize: true
-    }
+export const loggerOptions = {
+    transport: {
+        target: 'pino-pretty',
+        options: {
+            colorize: true
+        }
+    },
+    level: 'debug'
 }
 
-const logger = pino({ transport: loggerTransportOptions })
+const logger = pino(loggerOptions)
 
 export default logger
