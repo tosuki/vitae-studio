@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2022",
+    "rootDir": "src/",
+    "outDir": "dist/",
+    "lib": [
+      "ES2024",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "allowJs": true,
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": [
+      "src/types",
+      "node_modules/@types"
+    ]
+  },
+  "include": [
+    "src",
+    "test"
+  ]
+}
