@@ -1,47 +1,15 @@
 import "dotenv/config"
-
-import { z, ZodError } from "zod"
-import logger from "./logger"
-
-process.on("uncaughtException", (error) => {
-    if (error instanceof ZodError) {
-        logger.error(z.prettifyError(error))
-        process.exit(1)
-    }
-
-    throw error
-})
+import { z } from "zod"
 
 const envSchema = z.object({
-    API_PORT: z.string().optional().default("3000").superRefine((validate, ctx) => {
-        const parsed = Number(validate)
-
-        if (isNaN(parsed)) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "The API_PORT variable must be a number"
-            })
-
-            return z.NEVER
-        }
-    }).transform((value) => Number(value)),
-
-    API_HOST: z.string().optional().default("127.0.0.1"),
-    REDIS_HOST: z.string().optional().default("127.0.0.1"),
-    REDIS_PORT: z.string().optional().default("6379").superRefine((val, ctx) => {
-        const parsed = Number(val)
-
-        if (isNaN(parsed)) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "The REDIS_PORT variable must be a number"
-            })
-
-            return z.NEVER
-        }
-    }).transform((val) => Number(val))
+    API_HOST: z.string().default("127.0.0.1"),
+    API_PORT: z.coerce.number().default(3000),
+    REDIS_HOST: z.string().default("127.0.0.1"),
+    REDIS_PORT: z.coerce.number().default(6379),
+    GEMINI_API_KEY: z.string().optional().default(""),
+    LINKEDIN_LOGIN_PAGE: z.string().url().optional().default('https://www.linkedin.com/login/?trk=guest_homepage-basic_nav-header-signin'),
+    LINKEDIN_COOKIES_NAME: z.string().optional().default("linkedin"),
+    RESOURCES_DIR: z.string().default('resources'),
 })
 
-const env = envSchema.parse(process.env)
-
-export default env
+export default envSchema.parse(process.env)

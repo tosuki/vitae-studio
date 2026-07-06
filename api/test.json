@@ -1,0 +1,105 @@
+{
+	"id": "6107f33e-08f4-4e05-a081-2952e80d9f46",
+	"status": "DONE",
+	"linkedinJobId": "4431738059",
+	"extractedJson": {
+		"personal": {
+			"fullName": "João Silva",
+			"title": "Desenvolvedor Full Stack Sênior",
+			"email": "joao.silva@email.com",
+			"phone": "+55 11 98765-4321",
+			"location": "Brazil (Home Office)",
+			"linkedin": "https://linkedin.com/in/joaosilvafullstack",
+			"github": "https://github.com/joaosilvadev"
+		},
+		"objective": "Busco uma posição desafiadora como Desenvolvedor Full Stack na Foursys, onde possa aplicar minha sólida experiência em Java 21/25, Spring Boot 3+, Angular e arquitetura de microsserviços para desenvolver soluções inovadoras e escaláveis, contribuindo para a transformação digital e os objetivos da empresa.",
+		"experience": [
+			{
+				"id": "exp-1720077000001",
+				"company": "Global Tech Solutions",
+				"role": "Senior Full Stack Developer",
+				"location": "São Paulo, Brazil (Remote)",
+				"startDate": "2020-03-01",
+				"endDate": "",
+				"description": "Liderei o desenvolvimento e a evolução de soluções backend utilizando Java 17/21 e Spring Boot 3+, garantindo alta performance e escalabilidade. Projetei e implementei arquiteturas de microsserviços e Arquitetura Hexagonal (Ports & Adapters). Desenvolvi APIs REST e SOAP, com integração assíncrona via Kafka e Azure Service Bus. Apliquei Clean Code, Design Patterns e testes automatizados (JUnit, Mockito). Gerenciei bancos de dados SQL (SQL Server) e NoSQL (MongoDB), e participei ativamente da esteira DevOps com Git, Maven, Docker, Kubernetes e pipelines de CI/CD."
+			}
+		],
+		"education": [
+			{
+				"id": "edu-1720077000002",
+				"institution": "Universidade Federal de Tecnologia",
+				"degree": "Bacharelado em Ciência da Computação",
+				"startDate": "2015-08-01",
+				"endDate": "2019-12-15",
+				"description": "Conclusão de curso superior focado em desenvolvimento de software, algoritmos e estruturas de dados, com projetos práticos em Java e arquitetura de sistemas."
+			}
+		],
+		"certificates": [
+			{
+				"id": "cert-1720077000003",
+				"name": "AWS Certified Developer - Associate",
+				"organization": "Amazon Web Services (AWS)",
+				"date": "2022-06-01"
+			},
+			{
+				"id": "cert-1720077000004",
+				"name": "Spring Professional Certification",
+				"organization": "Pivotal/VMware",
+				"date": "2021-09-15"
+			}
+		],
+		"skills": [
+			"Java (21/25)",
+			"Spring Boot (3+)",
+			"Angular",
+			"Microsserviços",
+			"Arquitetura Hexagonal (Ports & Adapters)",
+			"APIs REST",
+			"APIs SOAP",
+			"Kafka",
+			"Azure Service Bus",
+			"Clean Code",
+			"Design Patterns",
+			"JUnit",
+			"Mockito",
+			"SQL (DB2, SQL Server)",
+			"NoSQL (MongoDB/Atlas)",
+			"Redis",
+			"Blob Storage/Object Storage",
+			"Git",
+			"Maven",
+			"Docker",
+			"Kubernetes (ARO/OpenShift)",
+			"ArgoCD",
+			"GitHub Actions",
+			"ELK Stack",
+			"Dynatrace",
+			"SonarQube",
+			"Fortify",
+			"Scrum",
+			"Liderança Técnica",
+			"gRPC",
+			"Microsoft Azure (Azure Functions)"
+		],
+		"languages": [
+			{
+				"id": "lang-1720077000005",
+				"name": "Português",
+				"level": "Nativo"
+			},
+			{
+				"id": "lang-1720077000006",
+				"name": "Inglês",
+				"level": "Avançado"
+			}
+		],
+		"style": {
+			"theme": "modern",
+			"fontFamily": "Inter",
+			"accentColor": "#0077B5",
+			"spacing": "normal"
+		}
+	},
+	"errorMessage": null,
+	"updatedAt": 1783234199143
+}

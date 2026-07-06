@@ -1,0 +1,14 @@
+services:
+  redis_vitae:
+    image: redis:7.4-alpine
+    container_name: redis_vitae
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+    - redis_data:/data
+
+volumes:
+  redis_data:
+    driver: local
+    

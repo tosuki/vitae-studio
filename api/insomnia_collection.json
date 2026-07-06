@@ -1,0 +1,52 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-07-05T06:47:12.037Z",
+  "__export_source": "mcp-insomnia",
+  "resources": [
+    {
+      "_id": "wrk_82ba5745f83f4fb0b7a5714677a9efa6",
+      "_type": "workspace",
+      "name": "CV Enrichment API",
+      "description": "Collection for testing the CV Enrichment API, which scrapes LinkedIn jobs and enriches them via Gemini API",
+      "scope": "collection",
+      "modified": 1783232859883,
+      "created": 1783232859883
+    },
+    {
+      "_id": "req_37f3235bff2b4b939b7f0299900a3a9c",
+      "_type": "request",
+      "parentId": "wrk_82ba5745f83f4fb0b7a5714677a9efa6",
+      "name": "Create Task",
+      "description": "",
+      "url": "http://127.0.0.1:3000/tasks",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"linkedinJobId\": \"4431738059\"\n}"
+      },
+      "modified": 1783232867404,
+      "created": 1783232867404
+    },
+    {
+      "_id": "req_73b8df14123449fbad96250ce9586d04",
+      "_type": "request",
+      "parentId": "wrk_82ba5745f83f4fb0b7a5714677a9efa6",
+      "name": "Get Task",
+      "description": "",
+      "url": "http://127.0.0.1:3000/tasks/:id",
+      "method": "GET",
+      "headers": [],
+      "parameters": [],
+      "modified": 1783232870056,
+      "created": 1783232870056
+    }
+  ]
+}
