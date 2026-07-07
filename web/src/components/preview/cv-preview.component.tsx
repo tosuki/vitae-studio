@@ -5,6 +5,7 @@ import EducationPreview from './education-preview.component';
 import CertificatesPreview from './certificates-preview.component';
 import SkillsLanguagesPreview from './skills-languages-preview.component';
 import { CVData } from '../../types/cv.model';
+import './cv-preview.component.css';
 
 interface CVPreviewProps {
   data: CVData;

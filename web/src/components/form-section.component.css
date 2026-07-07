@@ -1,0 +1,71 @@
+/* FORM STYLING inside Editor Accordion */
+.form-section {
+  flex-shrink: 0;
+  border: 1px solid var(--db-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--db-card-bg);
+  transition: box-shadow 0.2s;
+}
+
+.form-section:focus-within,
+.form-section.is-open {
+  box-shadow: var(--shadow-md);
+}
+
+.form-section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--db-text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: background-color 0.2s;
+}
+
+.form-section-header:hover {
+  background-color: var(--db-bg);
+}
+
+.form-section-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-section-icon {
+  color: var(--btn-primary-bg);
+  display: flex;
+  align-items: center;
+}
+
+.form-section-arrow {
+  color: var(--db-text-secondary);
+  transition: transform 0.2s ease-in-out;
+  display: flex;
+}
+
+.form-section-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.form-section-content {
+  padding: 18px;
+  border-top: 1px solid var(--db-border);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background-color: var(--db-card-bg);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

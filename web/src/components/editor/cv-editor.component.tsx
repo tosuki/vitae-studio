@@ -9,6 +9,7 @@ import CertificatesForm from './certificates-form.component';
 import SkillsForm from './skills-form.component';
 import LanguagesForm from './languages-form.component';
 import { CVData, PersonalData, ExperienceItem, EducationItem, CertificateItem, LanguageItem, StyleConfig } from '../../types/cv.model';
+import './cv-editor.component.css';
 
 interface CVEditorProps {
   data: CVData;

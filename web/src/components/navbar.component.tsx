@@ -1,5 +1,6 @@
 import { useRef, ChangeEvent } from 'react';
 import { CVData } from '../types/cv.model';
+import './navbar.component.css';
 
 interface NavbarProps {
   onLoadSample: () => void;

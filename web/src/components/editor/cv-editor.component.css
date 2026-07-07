@@ -1,0 +1,204 @@
+/* EDITOR PANEL */
+.cv-editor {
+  width: clamp(360px, 30vw, 450px);
+  flex-shrink: 0;
+  background-color: var(--db-card-bg);
+  border-right: 1px solid var(--db-border);
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  max-height: 100%;
+}
+
+/* ITEM CARDS (e.g. for dynamic lists) */
+.section-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-card {
+  border: 1px solid var(--db-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: var(--db-bg);
+}
+
+.item-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--db-border);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--db-text-primary);
+}
+
+.item-card-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.item-card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  background: var(--db-card-bg);
+  border: 1px solid var(--db-border);
+  color: var(--db-text-primary);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background-color: var(--db-border);
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-danger-outline-icon {
+  color: #ef4444;
+}
+
+.btn-danger-outline-icon:hover {
+  background-color: #fee2e2 !important;
+}
+
+.item-card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* SKILLS TAG CONTAINER */
+.skills-form {
+  display: flex;
+  gap: 8px;
+}
+
+.skills-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--db-input-border);
+  background-color: var(--db-input-bg);
+  border-radius: 6px;
+  color: var(--db-text-primary);
+  font-size: 0.85rem;
+}
+
+.skills-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(124, 58, 237, 0.1);
+  color: var(--btn-primary-bg);
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.skill-tag-remove {
+  border: none;
+  background: none;
+  color: var(--btn-primary-bg);
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.skill-tag-remove:hover {
+  color: #dc2626;
+}
+
+.language-item-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.language-item-row input {
+  flex: 2;
+  padding: 8px;
+  background-color: var(--db-input-bg);
+  border: 1px solid var(--db-input-border);
+  border-radius: 6px;
+  color: var(--db-text-primary);
+}
+
+.language-item-row select {
+  flex: 1.5;
+  padding: 8px;
+  background-color: var(--db-input-bg);
+  border: 1px solid var(--db-input-border);
+  border-radius: 6px;
+  color: var(--db-text-primary);
+}
+
+.empty-text {
+  font-size: 0.8rem;
+  color: var(--db-text-secondary);
+  font-style: italic;
+  margin: 4px 0;
+}
+
+/* CUSTOM COLOR DOTS */
+.color-picker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.color-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px var(--db-border);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.color-dot.active {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--btn-primary-bg);
+}
+
+.color-custom-picker {
+  width: 26px !important;
+  height: 26px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: none !important;
+  cursor: pointer;
+}

@@ -1,3 +1,5 @@
+import './modal.component.css';
+
 interface ModalProps {
   title: string;
   message: string;

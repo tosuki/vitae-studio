@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import './form-section.component.css';
 
 interface FormSectionProps {
   title: string;
