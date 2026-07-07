@@ -1,4 +1,4 @@
-import { CVData } from "./cv";
+import { CVData } from "./cv.model";
 
 export type TaskStatus = 'PENDING' | 'EXTRACTING_LINKEDIN' | 'EXTRACTING_GEMINI' | 'DONE' | 'FAILED';
 
@@ -8,7 +8,7 @@ export interface Task {
     linkedinJobId: string;
     rawHtml: string | null;
     cv: CVData
-    extractedJson: string | null;
+    enrichedCV: Omit<CVData, "style"> | null
     errorMessage: string | null;
     createdAt: number;
     updatedAt: number;

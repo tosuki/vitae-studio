@@ -5,6 +5,7 @@ import { GoogleGenAI } from "@google/genai";
 import { QueueManager } from "./queue";
 import { TaskService } from "./services/task.service";
 import env from "../../env";
+import { ConfigurationError } from "../../util/errors";
 
 let clusterHolderInstance: ClusterHolder | null = null;
 let redisInstance: Redis | null = null;
@@ -46,7 +47,7 @@ export const getRedisClient = (): Redis => {
 export const getGeminiClient = (): GoogleGenAI => {
     if (geminiInstance === null) {
         if (!env.GEMINI_API_KEY) {
-            throw new Error("GEMINI_API_KEY não foi configurada nas variáveis de ambiente.");
+            throw new ConfigurationError("GEMINI_API_KEY não foi configurada nas variáveis de ambiente.")
         }
         geminiInstance = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
     }

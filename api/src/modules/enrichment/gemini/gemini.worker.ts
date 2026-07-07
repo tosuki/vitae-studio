@@ -1,19 +1,21 @@
 import { Job, UnrecoverableError } from "bullmq";
-import { extractJobInfoWithGemini, ExtractedResume } from "./gemini";
+import { enrichCVWithGemini } from "./gemini";
 import { getTaskService } from "../factory";
 import { TaskService } from "../services/task.service";
 import { GeminiQuotaExhaustedError } from "../../../util/errors";
 import { logger } from "../../../util/logger";
+import { CVData } from "../model/cv.model";
 
-export const geminiWorkerHandler = async (job: Job<{ taskId: string; rawHtml: string }>): Promise<void> => {
-    const { taskId, rawHtml } = job.data;
+export const geminiWorkerHandler = async (job: Job<{ taskId: string; rawHtml: string, cv: CVData }>): Promise<void> => {
+    const { taskId, rawHtml, cv } = job.data;
+
     const taskService: TaskService = getTaskService();
 
     if (job.attemptsMade === 0) {
         await taskService.updateTask(taskId, { status: "EXTRACTING_GEMINI" });
     }
 
-    const result = await extractJobInfoWithGemini(rawHtml);
+    const result = await enrichCVWithGemini(rawHtml, cv);
 
     if (result.err) {
         const attemptsLimit: number = job.opts.attempts || 1;
@@ -45,10 +47,11 @@ export const geminiWorkerHandler = async (job: Job<{ taskId: string; rawHtml: st
         throw result.err;
     }
 
-    const extractedData: ExtractedResume = result.data;
+    const extractedData: Omit<CVData, "style"> = result.data;
+
     await taskService.updateTask(taskId, {
         status: "DONE",
-        extractedJson: JSON.stringify(extractedData),
+        enrichedCV: extractedData,
         errorMessage: null
     });
 };

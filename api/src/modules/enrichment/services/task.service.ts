@@ -4,7 +4,7 @@ import { QueueManager } from "../queue";
 import { CreateTaskDTO } from "../dtos/create-task.dto";
 import { TaskResponseDTO } from "../dtos/task-response.dto";
 import { Task } from "../model/task.model";
-import { ExtractedResume } from "../gemini/gemini";
+import { CVData } from "../model/cv.model";
 
 export class TaskService {
     constructor(
@@ -22,15 +22,14 @@ export class TaskService {
             linkedinJobId: dto.linkedinJobId,
             rawHtml: null,
             cv: dto.cv,
-            extractedJson: null,
+            enrichedCV: null,
             errorMessage: null,
             createdAt: now,
             updatedAt: now
         };
 
         await this.redis.set(`tasks:${taskId}`, JSON.stringify(task));
-
-        await this.queueManager.addLinkedinJob(taskId, dto.linkedinJobId);
+        await this.queueManager.addLinkedinJob(taskId, dto.linkedinJobId, dto.cv);
 
         return this.mapToResponseDTO(task);
     }
@@ -64,20 +63,11 @@ export class TaskService {
     }
 
     private mapToResponseDTO(task: Task): TaskResponseDTO {
-        let parsedJson: ExtractedResume | null = null;
-        if (task.extractedJson) {
-            try {
-                parsedJson = JSON.parse(task.extractedJson) as ExtractedResume;
-            } catch {
-                parsedJson = null;
-            }
-        }
-
         return {
             id: task.id,
             status: task.status,
             linkedinJobId: task.linkedinJobId,
-            extractedJson: parsedJson,
+            enrichedCV: task.enrichedCV,
             errorMessage: task.errorMessage,
             updatedAt: task.updatedAt
         };

@@ -1,4 +1,4 @@
-import { CVData } from "../model/cv";
+import { CVData } from "../model/cv.model";
 
 export interface CreateTaskDTO {
     linkedinJobId: string;

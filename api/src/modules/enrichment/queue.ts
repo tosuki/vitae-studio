@@ -3,6 +3,7 @@ import { linkedinWorkerHandler } from "./crawler/linkedin.worker";
 import { geminiWorkerHandler } from "./gemini/gemini.worker";
 import env from "../../env";
 import { logger } from "../../util/logger";
+import { CVData } from "./model/cv.model";
 
 export class QueueManager {
     private linkedinQueue: Queue;
@@ -43,12 +44,12 @@ export class QueueManager {
         });
     }
 
-    public async addLinkedinJob(taskId: string, linkedinJobId: string) {
-        await this.linkedinQueue.add("extract-linkedin", { taskId, linkedinJobId });
+    public async addLinkedinJob(taskId: string, linkedinJobId: string, cv: CVData) {
+        await this.linkedinQueue.add("extract-linkedin", { taskId, linkedinJobId, cv });
     }
 
-    public async addGeminiJob(taskId: string, rawHtml: string) {
-        await this.geminiQueue.add("extract-gemini", { taskId, rawHtml });
+    public async addGeminiJob(taskId: string, rawHtml: string, cv: CVData) {
+        await this.geminiQueue.add("extract-gemini", { taskId, rawHtml, cv });
     }
 
     public startWorkers() {

@@ -4,9 +4,10 @@ import { getTaskService, getQueueManager } from "../factory";
 import { QueueManager } from "../queue";
 import { TaskService } from "../services/task.service";
 import { logger } from "../../../util/logger";
+import { CVData } from "../model/cv.model";
 
-export const linkedinWorkerHandler = async (job: Job<{ taskId: string; linkedinJobId: string }>): Promise<void> => {
-    const { taskId, linkedinJobId } = job.data;
+export const linkedinWorkerHandler = async (job: Job<{ taskId: string; linkedinJobId: string, cv: CVData }>): Promise<void> => {
+    const { taskId, linkedinJobId, cv } = job.data;
     const taskService: TaskService = getTaskService();
     const queueManager: QueueManager = getQueueManager();
 
@@ -37,11 +38,12 @@ export const linkedinWorkerHandler = async (job: Job<{ taskId: string; linkedinJ
     }
 
     const rawHtml: string = result.data;
+
     await taskService.updateTask(taskId, {
         status: "EXTRACTING_GEMINI",
         rawHtml,
         errorMessage: null
     });
 
-    await queueManager.addGeminiJob(taskId, rawHtml);
+    await queueManager.addGeminiJob(taskId, rawHtml, cv);
 };
