@@ -1,11 +1,11 @@
-import Navbar from './components/Navbar';
-import CVEditor from './components/editor/CVEditor';
-import CVPreview from './components/preview/CVPreview';
-import Modal from './components/Modal';
-import { useCVState } from './hooks/useCVState';
-import { useSidebarResize } from './hooks/useSidebarResize';
-import { useModalState } from './hooks/useModalState';
-import { CVData } from './types/cv';
+import Navbar from './components/navbar.component';
+import CVEditor from './components/editor/cv-editor.component';
+import CVPreview from './components/preview/cv-preview.component';
+import Modal from './components/modal.component';
+import { useCVState } from './hooks/cv-state.hook';
+import { useSidebarResize } from './hooks/sidebar-resize.hook';
+import { useModalState } from './hooks/modal-state.hook';
+import { CVData } from './types/cv.model';
 
 export default function App() {
   const {
