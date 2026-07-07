@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import Navbar from './components/navbar.component';
 import CVEditor from './components/editor/cv-editor.component';
 import CVPreview from './components/preview/cv-preview.component';
 import Modal from './components/modal.component';
+import EnrichmentModal from './components/enrichment-modal.component';
 import { useCVState } from './hooks/cv-state.hook';
 import { useSidebarResize } from './hooks/sidebar-resize.hook';
 import { useModalState } from './hooks/modal-state.hook';
+import { EnrichmentProvider } from './hooks/enrichment.hook';
 import { CVData } from './types/cv.model';
 
-export default function App() {
+function AppContent() {
   const {
     cvData,
     setCvData,
@@ -18,6 +21,7 @@ export default function App() {
 
   const { sidebarWidth, isResizing, startResizing } = useSidebarResize(420);
   const { modalConfig, showAlert, showConfirm, closeModal } = useModalState();
+  const [isEnrichmentModalOpen, setIsEnrichmentModalOpen] = useState(false);
 
   // OPERAÇÕES GLOBAIS (NAVBAR)
   const handleLoadSample = () => {
@@ -77,6 +81,7 @@ export default function App() {
         onImportJson={handleImportJson}
         onPrint={handlePrint}
         onAlert={showAlert}
+        onOpenEnrichment={() => setIsEnrichmentModalOpen(true)}
       />
 
       <div className={`dashboard-workspace ${isResizing ? 'is-resizing' : ''}`}>
@@ -100,6 +105,21 @@ export default function App() {
           onConfirm={modalConfig.onConfirm || undefined}
         />
       )}
+
+      <EnrichmentModal
+        isOpen={isEnrichmentModalOpen}
+        onClose={() => setIsEnrichmentModalOpen(false)}
+        cvData={cvData}
+        onApplyEnrichment={setCvData}
+      />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <EnrichmentProvider>
+      <AppContent />
+    </EnrichmentProvider>
   );
 }

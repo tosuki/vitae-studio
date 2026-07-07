@@ -9,9 +9,10 @@ interface NavbarProps {
   onImportJson: (data: CVData) => void;
   onPrint: () => void;
   onAlert: (title: string, message: string) => void;
+  onOpenEnrichment: () => void;
 }
 
-export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJson, onPrint, onAlert }: NavbarProps) {
+export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJson, onPrint, onAlert, onOpenEnrichment }: NavbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +31,7 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
         event.target.value = '';
       } catch {
         onAlert(
-          "Erro na Importação", 
+          "Erro na Importação",
           "Não foi possível ler o arquivo JSON. Certifique-se de que é um arquivo válido gerado por esta ferramenta."
         );
       }
@@ -53,9 +54,18 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
 
       <div className="navbar-actions">
         <div className="action-group">
-          <button 
-            type="button" 
-            className="btn btn-secondary" 
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onOpenEnrichment}
+            title="Enriquecer"
+          >
+            Enriquecer
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
             onClick={onLoadSample}
             title="Preencher com dados fictícios profissionais"
           >
@@ -67,10 +77,10 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
             </svg>
             Carregar Exemplo
           </button>
-          
-          <button 
-            type="button" 
-            className="btn btn-danger-outline" 
+
+          <button
+            type="button"
+            className="btn btn-danger-outline"
             onClick={onClear}
             title="Limpar todos os campos do currículo"
           >
@@ -83,9 +93,9 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
         </div>
 
         <div className="action-group">
-          <button 
-            type="button" 
-            className="btn btn-secondary" 
+          <button
+            type="button"
+            className="btn btn-secondary"
             onClick={() => fileInputRef.current?.click()}
             title="Importar dados de um arquivo JSON"
           >
@@ -96,17 +106,17 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
             </svg>
             Importar JSON
           </button>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept=".json" 
-            style={{ display: 'none' }} 
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".json"
+            style={{ display: 'none' }}
           />
 
-          <button 
-            type="button" 
-            className="btn btn-secondary" 
+          <button
+            type="button"
+            className="btn btn-secondary"
             onClick={onExportJson}
             title="Exportar dados atuais do currículo como arquivo JSON"
           >
@@ -119,9 +129,9 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
           </button>
         </div>
 
-        <button 
-          type="button" 
-          className="btn btn-primary" 
+        <button
+          type="button"
+          className="btn btn-primary"
           onClick={onPrint}
           title="Imprimir ou Salvar currículo como PDF"
         >
