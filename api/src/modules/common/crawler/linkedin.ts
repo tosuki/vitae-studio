@@ -1,4 +1,4 @@
-import { getClusterInstance } from "../factory";
+import { getClusterInstance } from "../factory"
 import { LinkedInScrapingError } from "../../../util/errors";
 
 export const getLinkedinJobRawDetails = async (code: string): Promise<Result<LinkedInScrapingError, string>> => {

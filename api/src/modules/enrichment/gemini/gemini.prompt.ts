@@ -1,4 +1,4 @@
-import { CVData } from "../model/cv.model";
+import { CVData } from "../../common/model/cv.model";
 
 export const ENRICHMENT_GEMINI_PROMPT = (cv: CVData, rawHtml: string) => `
 Atue como um recrutador técnico especialista em ATS (Applicant Tracking Systems). Seu objetivo é otimizar o meu currículo para a vaga contida no HTML abaixo, maximizando as chances de triagem sem inventar falsas experiências.

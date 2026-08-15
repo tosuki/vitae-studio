@@ -8,7 +8,7 @@ import {
 
 import { LinkedinJob } from "../model/linkedin-job.model";
 import { CVResponseSchema } from "./gemini.schema"
-import { CVData } from "../model/cv.model";
+import { CVData } from "../../common/model/cv.model";
 
 import { ENRICHMENT_GEMINI_PROMPT } from "./gemini.prompt"
 

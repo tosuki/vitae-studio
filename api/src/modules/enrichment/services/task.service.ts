@@ -4,7 +4,7 @@ import { QueueManager } from "../queue";
 import { CreateTaskDTO } from "../dtos/create-task.dto";
 import { TaskResponseDTO } from "../dtos/task-response.dto";
 import { Task } from "../model/task.model";
-import { CVData } from "../model/cv.model";
+import { CVData } from "../../common/model/cv.model";
 
 export class TaskService {
     constructor(

@@ -1,9 +1,9 @@
 import { Queue, Worker } from "bullmq";
-import { linkedinWorkerHandler } from "./crawler/linkedin.worker";
+import { linkedinWorkerHandler } from "./linkedin.worker";
 import { geminiWorkerHandler } from "./gemini/gemini.worker";
 import env from "../../env";
 import { logger } from "../../util/logger";
-import { CVData } from "./model/cv.model";
+import { CVData } from "../common/model/cv.model";
 
 export class QueueManager {
     private linkedinQueue: Queue;

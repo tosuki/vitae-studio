@@ -1,4 +1,4 @@
-import { CVData } from "../model/cv.model";
+import { CVData } from "../../common/model/cv.model";
 import { TaskStatus } from "../model/task.model";
 
 export interface TaskResponseDTO {

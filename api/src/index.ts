@@ -1,5 +1,7 @@
 import httpServer from "./modules/http";
 import { getQueueManager, shutdownAll } from "./modules/enrichment/factory";
+import { shutdownAll as commonShutdownAll } from "./modules/common/factory"
+
 import { logger } from "./util/logger";
 
 const main = async (): Promise<void> => {
@@ -20,6 +22,8 @@ const main = async (): Promise<void> => {
 const handleShutdown = async (signal: string): Promise<void> => {
     logger.info(`Recebido sinal de encerramento ${signal}. Finalizando recursos...`);
     await shutdownAll();
+    await commonShutdownAll();
+
     logger.info("Todos os recursos foram limpos. Encerrando processo.");
     process.exit(0);
 };

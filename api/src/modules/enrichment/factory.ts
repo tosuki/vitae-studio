@@ -1,4 +1,4 @@
-import { ClusterHolder } from "./cluster";
+import { ClusterHolder } from "../common/cluster";
 import { Cluster } from "puppeteer-cluster";
 import Redis from "ioredis";
 import { GoogleGenAI } from "@google/genai";
@@ -7,31 +7,10 @@ import { TaskService } from "./services/task.service";
 import env from "../../env";
 import { ConfigurationError } from "../../util/errors";
 
-let clusterHolderInstance: ClusterHolder | null = null;
 let redisInstance: Redis | null = null;
 let geminiInstance: GoogleGenAI | null = null;
 let queueManagerInstance: QueueManager | null = null;
 let taskServiceInstance: TaskService | null = null;
-
-export const getClusterHolder = (): ClusterHolder => {
-    if (clusterHolderInstance === null) {
-        clusterHolderInstance = new ClusterHolder({
-            headless: false,
-            args: ["--no-sandbox", "--disable-setuid-sandbox"]
-        });
-    }
-    return clusterHolderInstance;
-};
-
-export const getClusterInstance = async (): Promise<Cluster> => {
-    const holder = getClusterHolder();
-    try {
-        return holder.getCluster();
-    } catch {
-        await holder.start();
-        return holder.getCluster();
-    }
-};
 
 export const getRedisClient = (): Redis => {
     if (redisInstance === null) {
@@ -72,9 +51,7 @@ export const shutdownAll = async () => {
     if (queueManagerInstance !== null) {
         await queueManagerInstance.shutdown();
     }
-    if (clusterHolderInstance !== null) {
-        await clusterHolderInstance.close();
-    }
+
     if (redisInstance !== null) {
         await redisInstance.quit();
     }

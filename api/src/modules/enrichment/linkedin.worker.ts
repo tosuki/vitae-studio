@@ -1,10 +1,10 @@
 import { Job } from "bullmq";
-import { getLinkedinJobRawDetails } from "./linkedin";
-import { getTaskService, getQueueManager } from "../factory";
-import { QueueManager } from "../queue";
-import { TaskService } from "../services/task.service";
-import { logger } from "../../../util/logger";
-import { CVData } from "../model/cv.model";
+import { getLinkedinJobRawDetails } from "../common/crawler/linkedin";
+import { getTaskService, getQueueManager } from "./factory";
+import { QueueManager } from "./queue";
+import { TaskService } from "./services/task.service";
+import { logger } from "../../util/logger";
+import { CVData } from "../common/model/cv.model";
 
 export const linkedinWorkerHandler = async (job: Job<{ taskId: string; linkedinJobId: string, cv: CVData }>): Promise<void> => {
     const { taskId, linkedinJobId, cv } = job.data;

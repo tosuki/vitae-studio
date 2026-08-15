@@ -4,7 +4,7 @@ import { getTaskService } from "../factory";
 import { TaskService } from "../services/task.service";
 import { GeminiQuotaExhaustedError } from "../../../util/errors";
 import { logger } from "../../../util/logger";
-import { CVData } from "../model/cv.model";
+import { CVData } from "../../common/model/cv.model";
 
 export const geminiWorkerHandler = async (job: Job<{ taskId: string; rawHtml: string, cv: CVData }>): Promise<void> => {
     const { taskId, rawHtml, cv } = job.data;

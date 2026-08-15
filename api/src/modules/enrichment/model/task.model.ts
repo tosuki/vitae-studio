@@ -1,4 +1,4 @@
-import { CVData } from "./cv.model";
+import { CVData } from "../../common/model/cv.model";
 
 export type TaskStatus = 'PENDING' | 'EXTRACTING_LINKEDIN' | 'EXTRACTING_GEMINI' | 'DONE' | 'FAILED';
 
