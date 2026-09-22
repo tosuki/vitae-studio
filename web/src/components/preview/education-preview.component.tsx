@@ -13,7 +13,7 @@ export default function EducationPreview({ educationList }: EducationPreviewProp
   };
 
   return (
-    <section className="cv-section">
+    <section className="cv-section" data-section="education">
       <h2 className="cv-section-title">Formação Acadêmica</h2>
       <div className="cv-section-divider"></div>
       <div className="cv-section-content education-list">

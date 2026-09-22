@@ -10,9 +10,10 @@ interface NavbarProps {
   onPrint: () => void;
   onAlert: (title: string, message: string) => void;
   onOpenEnrichment: () => void;
+  onOpenAtsValidation: () => void;
 }
 
-export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJson, onPrint, onAlert, onOpenEnrichment }: NavbarProps) {
+export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJson, onPrint, onAlert, onOpenEnrichment, onOpenAtsValidation }: NavbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -54,6 +55,19 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
 
       <div className="navbar-actions">
         <div className="action-group">
+          <button
+            type="button"
+            className="btn btn-ats"
+            onClick={onOpenAtsValidation}
+            title="Validar compatibilidade do currículo com sistemas ATS"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <polyline points="9 12 11 14 15 10"></polyline>
+            </svg>
+            Validar ATS
+          </button>
+
           <button
             type="button"
             className="btn btn-secondary"

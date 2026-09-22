@@ -40,8 +40,10 @@ export interface LanguageItem {
   level: string;
 }
 
+export type CVTheme = 'modern' | 'classic' | 'minimalist' | 'ats';
+
 export interface StyleConfig {
-  theme: string;
+  theme: CVTheme | string;
   fontFamily: string;
   accentColor: string;
   spacing: string;

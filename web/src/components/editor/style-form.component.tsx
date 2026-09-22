@@ -28,7 +28,13 @@ export default function StyleForm({ styleData, onChangeStyle }: StyleFormProps) 
             <option value="modern">Moderno (Centralizado)</option>
             <option value="classic">Clássico (Tradicional)</option>
             <option value="minimalist">Minimalista (Compacto)</option>
+            <option value="ats">🎯 Padrão ATS (Coluna Única Otimizada)</option>
           </select>
+          {styleData.theme === 'ats' && (
+            <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, marginTop: '4px', display: 'block' }}>
+              ✓ Layout 100% linear de alta precisão para robôs de triagem
+            </span>
+          )}
         </div>
 
         <div className="form-group">

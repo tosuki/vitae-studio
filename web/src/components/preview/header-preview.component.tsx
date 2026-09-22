@@ -6,7 +6,7 @@ interface HeaderPreviewProps {
 
 export default function HeaderPreview({ personal }: HeaderPreviewProps) {
   return (
-    <header className="cv-header">
+    <header className="cv-header" data-section="contact-info">
       <h1 className="cv-name">{personal.fullName || 'Seu Nome Completo'}</h1>
       {personal.title && <p className="cv-title">{personal.title}</p>}
       

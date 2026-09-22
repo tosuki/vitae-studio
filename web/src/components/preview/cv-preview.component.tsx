@@ -78,7 +78,7 @@ export default function CVPreview({ data }: CVPreviewProps) {
 
         {/* OBJETIVO */}
         {objective && (
-          <section className="cv-section">
+          <section className="cv-section" data-section="summary">
             <h2 className="cv-section-title">Objetivo Profissional</h2>
             <div className="cv-section-divider"></div>
             <div className="cv-section-content">

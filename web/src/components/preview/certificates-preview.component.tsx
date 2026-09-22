@@ -6,7 +6,7 @@ interface CertificatesPreviewProps {
 
 export default function CertificatesPreview({ certificatesList }: CertificatesPreviewProps) {
   return (
-    <section className="cv-section">
+    <section className="cv-section" data-section="certificates">
       <h2 className="cv-section-title">Certificados</h2>
       <div className="cv-section-divider"></div>
       <div className="cv-section-content certificates-grid">

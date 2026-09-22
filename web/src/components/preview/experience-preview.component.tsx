@@ -13,7 +13,7 @@ export default function ExperiencePreview({ experienceList }: ExperiencePreviewP
   };
 
   return (
-    <section className="cv-section">
+    <section className="cv-section" data-section="experience">
       <h2 className="cv-section-title">Experiência Profissional</h2>
       <div className="cv-section-divider"></div>
       <div className="cv-section-content experience-list">

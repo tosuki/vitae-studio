@@ -10,7 +10,7 @@ export default function SkillsLanguagesPreview({ skillsList, languagesList }: Sk
     <div className="cv-double-column-section">
       {/* COMPETÊNCIAS */}
       {skillsList.length > 0 && (
-        <section className="cv-section cv-flex-1">
+        <section className="cv-section cv-flex-1" data-section="skills">
           <h2 className="cv-section-title">Competências</h2>
           <div className="cv-section-divider"></div>
           <div className="cv-section-content">
@@ -25,7 +25,7 @@ export default function SkillsLanguagesPreview({ skillsList, languagesList }: Sk
 
       {/* IDIOMAS */}
       {languagesList.length > 0 && (
-        <section className="cv-section cv-flex-1">
+        <section className="cv-section cv-flex-1" data-section="languages">
           <h2 className="cv-section-title">Idiomas</h2>
           <div className="cv-section-divider"></div>
           <div className="cv-section-content">

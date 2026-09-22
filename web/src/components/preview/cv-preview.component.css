@@ -367,3 +367,88 @@
 .theme-minimalist .cv-section-divider {
   height: 1px;
 }
+
+/* 4. ATS THEME (Optimized Single-Column for Applicant Tracking Systems) */
+.theme-ats {
+  gap: calc(14px * var(--preview-spacing-multiplier)) !important;
+}
+
+.theme-ats .cv-header {
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: calc(10px * var(--preview-spacing-multiplier));
+  margin-bottom: calc(4px * var(--preview-spacing-multiplier));
+  text-align: left;
+}
+
+.theme-ats .cv-name {
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+  color: #0f172a;
+}
+
+.theme-ats .cv-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #334155;
+  margin-top: 2px;
+}
+
+.theme-ats .cv-contact-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: #334155;
+}
+
+.theme-ats .cv-section-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #0f172a;
+  border-bottom: 1.5px solid #0f172a;
+  padding-bottom: 3px;
+  margin-bottom: 4px;
+}
+
+.theme-ats .cv-section-divider {
+  display: none; /* Uses direct border-bottom on section title for clean parsing */
+}
+
+/* Force single column for double column section (Competências e Idiomas) */
+.theme-ats .cv-double-column-section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(14px * var(--preview-spacing-multiplier));
+}
+
+/* Force single column for certificates */
+.theme-ats .certificates-grid {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6px * var(--preview-spacing-multiplier));
+}
+
+/* Skills display in ATS theme: clean text list with subtle borders / pills */
+.theme-ats .cv-skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.theme-ats .cv-skill-pill {
+  background-color: transparent;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  padding: 3px 9px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.theme-ats .cv-lang-item {
+  border-bottom: 1px solid #e2e8f0;
+}
+

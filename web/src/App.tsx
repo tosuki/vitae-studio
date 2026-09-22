@@ -4,6 +4,7 @@ import CVEditor from './components/editor/cv-editor.component';
 import CVPreview from './components/preview/cv-preview.component';
 import Modal from './components/modal.component';
 import EnrichmentModal from './components/enrichment-modal.component';
+import AtsModal from './components/ats-modal.component';
 import { useCVState } from './hooks/cv-state.hook';
 import { useSidebarResize } from './hooks/sidebar-resize.hook';
 import { useModalState } from './hooks/modal-state.hook';
@@ -22,6 +23,11 @@ function AppContent() {
   const { sidebarWidth, isResizing, startResizing } = useSidebarResize(420);
   const { modalConfig, showAlert, showConfirm, closeModal } = useModalState();
   const [isEnrichmentModalOpen, setIsEnrichmentModalOpen] = useState(false);
+  const [isAtsModalOpen, setIsAtsModalOpen] = useState(false);
+
+  const handleApplyAtsTheme = () => {
+    cvActions.onChangeStyle('theme', 'ats');
+  };
 
   // OPERAÇÕES GLOBAIS (NAVBAR)
   const handleLoadSample = () => {
@@ -82,6 +88,7 @@ function AppContent() {
         onPrint={handlePrint}
         onAlert={showAlert}
         onOpenEnrichment={() => setIsEnrichmentModalOpen(true)}
+        onOpenAtsValidation={() => setIsAtsModalOpen(true)}
       />
 
       <div className={`dashboard-workspace ${isResizing ? 'is-resizing' : ''}`}>
@@ -111,6 +118,14 @@ function AppContent() {
         onClose={() => setIsEnrichmentModalOpen(false)}
         cvData={cvData}
         onApplyEnrichment={setCvData}
+      />
+
+      <AtsModal
+        isOpen={isAtsModalOpen}
+        onClose={() => setIsAtsModalOpen(false)}
+        cvData={cvData}
+        onApplyAtsTheme={handleApplyAtsTheme}
+        onPrint={handlePrint}
       />
     </div>
   );
