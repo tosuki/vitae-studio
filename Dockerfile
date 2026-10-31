@@ -22,7 +22,7 @@ WORKDIR /app
 COPY api/package*.json ./
 
 # Instala todas as dependências necessárias para compilação
-RUN npm ci
+RUN if [ -f package-lock.json ]; then npm ci || npm install; else npm install; fi
 
 # Copia o código fonte e arquivos de configuração da API
 COPY api/ ./
@@ -54,7 +54,7 @@ ARG VITE_API_URL=http://localhost:3000
 ENV VITE_API_URL=${VITE_API_URL}
 
 COPY web/package*.json ./
-RUN npm ci
+RUN if [ -f package-lock.json ]; then npm ci || npm install; else npm install; fi
 
 COPY web/ ./
 RUN npm run build
