@@ -11,9 +11,22 @@ interface NavbarProps {
   onAlert: (title: string, message: string) => void;
   onOpenEnrichment: () => void;
   onOpenAtsValidation: () => void;
+  onOpenSettings: () => void;
+  isAIConfigured?: boolean;
 }
 
-export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJson, onPrint, onAlert, onOpenEnrichment, onOpenAtsValidation }: NavbarProps) {
+export default function Navbar({
+  onLoadSample,
+  onClear,
+  onExportJson,
+  onImportJson,
+  onPrint,
+  onAlert,
+  onOpenEnrichment,
+  onOpenAtsValidation,
+  onOpenSettings,
+  isAIConfigured = false
+}: NavbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -72,9 +85,23 @@ export default function Navbar({ onLoadSample, onClear, onExportJson, onImportJs
             type="button"
             className="btn btn-secondary"
             onClick={onOpenEnrichment}
-            title="Enriquecer"
+            title="Otimizar currículo para vaga do LinkedIn com IA"
           >
             Enriquecer
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary btn-ai-settings"
+            onClick={onOpenSettings}
+            title={isAIConfigured ? "Provedor de IA configurado — clique para alterar" : "Configurar provedor de IA (Gemini, OpenAI ou 9router)"}
+          >
+            <span className={`ai-status-dot ${isAIConfigured ? "configured" : "pending"}`} />
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            Configurar IA
           </button>
 
           <button

@@ -8,9 +8,18 @@ interface EnrichmentModalProps {
     onClose: () => void
     cvData: CVData
     onApplyEnrichment: (enrichedCv: CVData) => void
+    isAIConfigured?: boolean
+    onOpenSettings?: () => void
 }
 
-export default function EnrichmentModal({ isOpen, onClose, cvData, onApplyEnrichment }: EnrichmentModalProps) {
+export default function EnrichmentModal({
+    isOpen,
+    onClose,
+    cvData,
+    onApplyEnrichment,
+    isAIConfigured = true,
+    onOpenSettings
+}: EnrichmentModalProps) {
     const [linkedinJobId, setLinkedinJobId] = useState("")
     const [validationError, setValidationError] = useState<string | null>(null)
 
@@ -39,6 +48,11 @@ export default function EnrichmentModal({ isOpen, onClose, cvData, onApplyEnrich
 
     const handleStart = () => {
         setValidationError(null)
+        if (!isAIConfigured) {
+            setValidationError("Configure um provedor de IA (Gemini, OpenAI ou 9router) antes de iniciar a otimização.")
+            return
+        }
+
         const trimmedId = linkedinJobId.trim()
         if (!trimmedId) {
             setValidationError("O ID da vaga é obrigatório.")
@@ -102,6 +116,26 @@ export default function EnrichmentModal({ isOpen, onClose, cvData, onApplyEnrich
                 <div className="enrichment-modal-body">
                     {!isPending && !isSuccess && !isError ? (
                         <>
+                            {!isAIConfigured && (
+                                <div className="enrichment-error-card" style={{ alignItems: "center", justifyContent: "space-between" }}>
+                                    <div>
+                                        <strong>IA ainda não configurada.</strong> Configure sua chave do Gemini, OpenAI ou 9router para usar o otimizador.
+                                    </div>
+                                    {onOpenSettings && (
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary"
+                                            style={{ flexShrink: 0, padding: "6px 10px", fontSize: "0.78rem" }}
+                                            onClick={() => {
+                                                onClose()
+                                                onOpenSettings()
+                                            }}
+                                        >
+                                            Configurar IA
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                             <p className="enrichment-description">
                                 Insira o ID numérico da vaga do LinkedIn ou o link da vaga. O assistente de inteligência artificial analisará os requisitos da vaga e adaptará o texto das suas experiências profissionais de maneira inteligente.
                             </p>

@@ -1,5 +1,5 @@
 import { Job, UnrecoverableError } from "bullmq";
-import { enrichCVWithGemini } from "./gemini";
+import { enrichCVWithAI } from "./gemini";
 import { getTaskService } from "../factory";
 import { TaskService } from "../services/task.service";
 import { GeminiQuotaExhaustedError } from "../../../util/errors";
@@ -15,20 +15,20 @@ export const geminiWorkerHandler = async (job: Job<{ taskId: string; rawHtml: st
         await taskService.updateTask(taskId, { status: "EXTRACTING_GEMINI" });
     }
 
-    const result = await enrichCVWithGemini(rawHtml, cv);
+    const result = await enrichCVWithAI(rawHtml, cv);
 
     if (result.err) {
         const attemptsLimit: number = job.opts.attempts || 1;
         const isLastAttempt: boolean = job.attemptsMade >= attemptsLimit - 1;
 
-        logger.warn(result.err, `Integração do Gemini falhou para a Task ${taskId} (Tentativa ${job.attemptsMade + 1}/${attemptsLimit})`);
+        logger.warn(result.err, `Integração de IA falhou para a Task ${taskId} (Tentativa ${job.attemptsMade + 1}/${attemptsLimit})`);
 
         const isRecoverable: boolean = result.err instanceof GeminiQuotaExhaustedError;
 
         if (!isRecoverable || isLastAttempt) {
             const errorMessage = isLastAttempt
-                ? `Extração do Gemini falhou definitivamente após ${attemptsLimit} tentativas: ${result.err.message}`
-                : `Falha crítica e definitiva na extração: ${result.err.message}`;
+                ? `Otimização por IA falhou definitivamente após ${attemptsLimit} tentativas: ${result.err.message}`
+                : `Falha na otimização por IA: ${result.err.message}`;
 
             await taskService.updateTask(taskId, {
                 status: "FAILED",

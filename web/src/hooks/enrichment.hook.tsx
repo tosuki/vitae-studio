@@ -85,7 +85,7 @@ export function useEnrichment() {
                 break
             case 'EXTRACTING_GEMINI':
                 progress = 75
-                statusLabel = "Analisando requisitos e otimizando o currículo com Gemini..."
+                statusLabel = "Analisando requisitos e otimizando o currículo com IA..."
                 break
             case 'DONE':
                 progress = 100

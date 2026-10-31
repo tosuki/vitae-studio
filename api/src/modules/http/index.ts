@@ -13,7 +13,10 @@ const start = async (): Promise<void> => {
     fastify.setValidatorCompiler(validatorCompiler);
     fastify.setSerializerCompiler(serializerCompiler);
 
-    await fastify.register(cors);
+    await fastify.register(cors, {
+        origin: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    });
     await fastify.register(router);
 
     try {

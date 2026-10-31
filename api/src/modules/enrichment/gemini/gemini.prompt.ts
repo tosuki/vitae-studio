@@ -16,4 +16,54 @@ Instruções estritas para a adaptação:
 4. Preservação de IDs: Para cada item em "experience", "education", "certificates" e "languages", você DEVE copiar exatamente o mesmo "id" recebido no currículo original. Não altere e não invente novos IDs.
 5. Formato de Datas: Todas as datas (startDate, endDate, date) devem obrigatoriamente estar no formato de string 'MM/AAAA' (ex: '02/2026'). Não use 'AAAA-MM-DD'. Para experiências em andamento, o campo 'endDate' deve ser retornado como string vazia "".
 6. Links Sociais: Os links de 'linkedin' e 'github' na seção 'personal' não devem conter protocolo ('https://' ou 'http://'). Devem começar diretamente com o domínio (ex: 'linkedin.com/in/nome').
+7. Formato de Saída: Retorne EXCLUSIVAMENTE um objeto JSON válido (sem blocos markdown e sem a propriedade "style") contendo exatamente a seguinte estrutura:
+{
+  "personal": {
+    "fullName": "string",
+    "title": "string",
+    "email": "string",
+    "phone": "string",
+    "location": "string",
+    "linkedin": "string",
+    "github": "string"
+  },
+  "objective": "string",
+  "experience": [
+    {
+      "id": "string (mesmo id original)",
+      "company": "string",
+      "role": "string",
+      "location": "string",
+      "startDate": "MM/AAAA",
+      "endDate": "MM/AAAA ou string vazia",
+      "description": "string"
+    }
+  ],
+  "education": [
+    {
+      "id": "string (mesmo id original)",
+      "institution": "string",
+      "degree": "string",
+      "startDate": "MM/AAAA",
+      "endDate": "MM/AAAA ou string vazia",
+      "description": "string"
+    }
+  ],
+  "certificates": [
+    {
+      "id": "string (mesmo id original)",
+      "name": "string",
+      "organization": "string",
+      "date": "MM/AAAA"
+    }
+  ],
+  "skills": ["string"],
+  "languages": [
+    {
+      "id": "string (mesmo id original)",
+      "name": "string",
+      "level": "string"
+    }
+  ]
+}
 `;

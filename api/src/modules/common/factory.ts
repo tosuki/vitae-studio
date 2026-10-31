@@ -1,13 +1,20 @@
 import { ClusterHolder } from "./cluster"
 import { Cluster } from "puppeteer-cluster"
+import env from "../../env"
 
 let clusterInstance: ClusterHolder | null = null;
 
 export function getClusterHolder(): ClusterHolder {
     if (clusterInstance === null) {
         clusterInstance = new ClusterHolder({
-            headless: false,
-            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+            headless: env.PUPPETEER_HEADLESS,
+            executablePath: env.PUPPETEER_EXECUTABLE_PATH,
+            args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu"
+            ]
         })
     }
 

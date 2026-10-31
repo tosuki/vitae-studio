@@ -1,10 +1,11 @@
 import axios, { isAxiosError } from "axios"
 import { CVData } from "../types/cv.model"
 
-export const CV_ENRICHMENT_API_URL = "http://localhost:3000"
+export const CV_ENRICHMENT_API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"
 
 const client = axios.create({
-    baseURL: CV_ENRICHMENT_API_URL
+    baseURL: CV_ENRICHMENT_API_URL,
+    timeout: 15000
 })
 
 export type TaskStatus = 'PENDING' | 'EXTRACTING_LINKEDIN' | 'EXTRACTING_GEMINI' | 'DONE' | 'FAILED';
