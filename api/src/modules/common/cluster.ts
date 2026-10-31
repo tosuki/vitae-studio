@@ -6,6 +6,8 @@ import { LaunchOptions } from "puppeteer"
 
 export type BrowserClusterOptions = LaunchOptions
 
+let stealthApplied = false
+
 export class ClusterHolder {
     private cluster: Cluster | null = null
     private options: LaunchOptions
@@ -17,6 +19,11 @@ export class ClusterHolder {
     async start() {
         if (this.cluster !== null) {
             throw new Error("O Cluster já se encontra inicializado.")
+        }
+
+        if (!stealthApplied) {
+            PuppeteerExtra.use(PuppeteerStealthMode())
+            stealthApplied = true
         }
 
         this.cluster = await Cluster.launch({

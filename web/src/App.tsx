@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/navbar.component';
 import CVEditor from './components/editor/cv-editor.component';
 import CVPreview from './components/preview/cv-preview.component';
 import Modal from './components/modal.component';
 import EnrichmentModal from './components/enrichment-modal.component';
 import AtsModal from './components/ats-modal.component';
+import SettingsModal from './components/settings-modal.component';
 import { useCVState } from './hooks/cv-state.hook';
 import { useSidebarResize } from './hooks/sidebar-resize.hook';
 import { useModalState } from './hooks/modal-state.hook';
 import { EnrichmentProvider } from './hooks/enrichment.hook';
+import { useSettings } from './hooks/settings.hook';
 import { CVData } from './types/cv.model';
+
+const ONBOARDING_DISMISSED_KEY = 'vitae_studio_onboarding_dismissed';
 
 function AppContent() {
   const {
@@ -24,6 +28,33 @@ function AppContent() {
   const { modalConfig, showAlert, showConfirm, closeModal } = useModalState();
   const [isEnrichmentModalOpen, setIsEnrichmentModalOpen] = useState(false);
   const [isAtsModalOpen, setIsAtsModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isOnboardingMode, setIsOnboardingMode] = useState(false);
+
+  const { isConfigured, isFetched, isError } = useSettings();
+
+  useEffect(() => {
+    if (isFetched && !isError && !isConfigured) {
+      const dismissed = sessionStorage.getItem(ONBOARDING_DISMISSED_KEY);
+      if (!dismissed) {
+        setIsOnboardingMode(true);
+        setIsSettingsModalOpen(true);
+      }
+    }
+  }, [isFetched, isError, isConfigured]);
+
+  const handleCloseSettings = () => {
+    if (isOnboardingMode) {
+      sessionStorage.setItem(ONBOARDING_DISMISSED_KEY, 'true');
+      setIsOnboardingMode(false);
+    }
+    setIsSettingsModalOpen(false);
+  };
+
+  const handleOpenSettingsManual = () => {
+    setIsOnboardingMode(false);
+    setIsSettingsModalOpen(true);
+  };
 
   const handleApplyAtsTheme = () => {
     cvActions.onChangeStyle('theme', 'ats');
@@ -89,6 +120,8 @@ function AppContent() {
         onAlert={showAlert}
         onOpenEnrichment={() => setIsEnrichmentModalOpen(true)}
         onOpenAtsValidation={() => setIsAtsModalOpen(true)}
+        onOpenSettings={handleOpenSettingsManual}
+        isAIConfigured={isConfigured}
       />
 
       <div className={`dashboard-workspace ${isResizing ? 'is-resizing' : ''}`}>
@@ -118,6 +151,8 @@ function AppContent() {
         onClose={() => setIsEnrichmentModalOpen(false)}
         cvData={cvData}
         onApplyEnrichment={setCvData}
+        isAIConfigured={isConfigured}
+        onOpenSettings={handleOpenSettingsManual}
       />
 
       <AtsModal
@@ -126,6 +161,12 @@ function AppContent() {
         cvData={cvData}
         onApplyAtsTheme={handleApplyAtsTheme}
         onPrint={handlePrint}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={handleCloseSettings}
+        isOnboarding={isOnboardingMode}
       />
     </div>
   );

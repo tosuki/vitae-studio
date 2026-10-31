@@ -1,0 +1,55 @@
+services:
+  redis:
+    image: redis:7.4-alpine
+    container_name: vitae_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    container_name: vitae_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PUPPETEER_HEADLESS=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+      - RESOURCES_DIR=/app/resources
+    volumes:
+      - ./api/resources:/app/resources
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+      args:
+        - VITE_API_URL=http://localhost:3000
+    container_name: vitae_web
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+volumes:
+  redis_data:
+    driver: local

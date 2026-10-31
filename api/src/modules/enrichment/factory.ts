@@ -4,13 +4,16 @@ import Redis from "ioredis";
 import { GoogleGenAI } from "@google/genai";
 import { QueueManager } from "./queue";
 import { TaskService } from "./services/task.service";
+import { SettingsService } from "../settings/settings.service";
 import env from "../../env";
 import { ConfigurationError } from "../../util/errors";
 
 let redisInstance: Redis | null = null;
 let geminiInstance: GoogleGenAI | null = null;
+let geminiInstanceKey: string | null = null;
 let queueManagerInstance: QueueManager | null = null;
 let taskServiceInstance: TaskService | null = null;
+let settingsServiceInstance: SettingsService | null = null;
 
 export const getRedisClient = (): Redis => {
     if (redisInstance === null) {
@@ -23,12 +26,25 @@ export const getRedisClient = (): Redis => {
     return redisInstance;
 };
 
-export const getGeminiClient = (): GoogleGenAI => {
-    if (geminiInstance === null) {
-        if (!env.GEMINI_API_KEY) {
-            throw new ConfigurationError("GEMINI_API_KEY não foi configurada nas variáveis de ambiente.")
-        }
-        geminiInstance = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+export const getSettingsService = (): SettingsService => {
+    if (settingsServiceInstance === null) {
+        settingsServiceInstance = new SettingsService(getRedisClient());
+    }
+    return settingsServiceInstance;
+};
+
+export const getGeminiClient = (customApiKey?: string): GoogleGenAI => {
+    const resolvedKey = (customApiKey || env.GEMINI_API_KEY || "").trim();
+    if (!resolvedKey) {
+        throw new ConfigurationError("A API Key do Gemini não foi configurada. Configure um provedor de IA nas configurações da plataforma.");
+    }
+
+    if (geminiInstance === null || geminiInstanceKey !== resolvedKey) {
+        geminiInstance = new GoogleGenAI({
+            apiKey: resolvedKey,
+            httpOptions: { timeout: 45000 }
+        });
+        geminiInstanceKey = resolvedKey;
     }
     return geminiInstance;
 };

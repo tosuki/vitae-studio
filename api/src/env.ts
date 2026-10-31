@@ -12,6 +12,11 @@ const envSchema = z.object({
     LINKEDIN_LOGIN_PAGE: z.preprocess(emptyToUndefined, z.string().url().optional().default('https://www.linkedin.com/login/?trk=guest_homepage-basic_nav-header-signin')),
     LINKEDIN_COOKIES_NAME: z.preprocess(emptyToUndefined, z.string().optional().default("linkedin")),
     RESOURCES_DIR: z.preprocess(emptyToUndefined, z.string().default('resources')),
+    PUPPETEER_HEADLESS: z.preprocess(
+        (val) => (val === "false" || val === false ? false : true),
+        z.boolean().default(true)
+    ),
+    PUPPETEER_EXECUTABLE_PATH: z.preprocess(emptyToUndefined, z.string().optional()),
 })
 
 export default envSchema.parse(process.env)

@@ -1,0 +1,22 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies
+**/node_modules
+**/.gradle
+
+# Build outputs
+**/dist
+**/dist-ssr
+**/.vite
+
+# Logs & temp
+**/*.log
+**/.agents
+**/preview.gif
+**/*.tsbuildinfo
+
+# Local env files
+**/.env
+**/.env.local

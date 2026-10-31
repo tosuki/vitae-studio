@@ -53,3 +53,25 @@
   border-right: 1px solid var(--db-border);
   padding-right: 16px;
 }
+
+.btn-ai-settings {
+  position: relative;
+}
+
+.ai-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.ai-status-dot.configured {
+  background-color: #16a34a;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+.ai-status-dot.pending {
+  background-color: #d97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
+}
