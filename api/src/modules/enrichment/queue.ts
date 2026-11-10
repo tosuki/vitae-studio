@@ -52,6 +52,10 @@ export class QueueManager {
         await this.geminiQueue.add("extract-gemini", { taskId, rawHtml, cv });
     }
 
+    public async addResumeParseJob(taskId: string, rawResumeText: string) {
+        await this.geminiQueue.add("parse-resume-gemini", { taskId, rawResumeText });
+    }
+
     public startWorkers() {
         const connection = {
             host: env.REDIS_HOST,

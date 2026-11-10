@@ -248,6 +248,11 @@ export function validateCVForATS(cvData: CVData): AtsReport {
     if (hasBullets) bulletPointEntries++;
   });
 
+  cvData.projects?.forEach((proj) => {
+    if (!proj.description) return;
+    allExperienceText.push(proj.description);
+  });
+
   const usesBulletPoints = experienceCount > 0 && bulletPointEntries >= Math.ceil(experienceCount / 2);
   checks.push({
     id: 'exp-bullets',
@@ -387,7 +392,8 @@ export function validateCVForATS(cvData: CVData): AtsReport {
   const dateRegex = /^(\d{4}|\d{2}\/\d{4}|\d{4}-\d{2})$/;
   const allDates = [
     ...(cvData.experience || []).flatMap((e) => [e.startDate, e.endDate].filter(Boolean)),
-    ...(cvData.education || []).flatMap((e) => [e.startDate, e.endDate].filter(Boolean))
+    ...(cvData.education || []).flatMap((e) => [e.startDate, e.endDate].filter(Boolean)),
+    ...(cvData.projects || []).flatMap((p) => [p.startDate, p.endDate].filter(Boolean))
   ];
   const validDates = allDates.filter((d) => dateRegex.test(d.trim()));
   const datesConsistent = allDates.length === 0 || validDates.length >= allDates.length * 0.75;
@@ -557,6 +563,23 @@ export function generateATSRobotText(cv: CVData): string {
     parts.push('');
   }
 
+  // PROJECTS
+  if (cv.projects && cv.projects.length > 0) {
+    parts.push('=== PROJETOS RELEVANTES & PESSOAIS ===');
+    cv.projects.forEach((proj) => {
+      const period = [proj.startDate, proj.endDate || 'Presente'].filter(Boolean).join(' - ');
+      parts.push(`PROJETO: ${proj.name || 'Não especificado'}${proj.role ? ` (${proj.role})` : ''}`);
+      if (proj.link) parts.push(`LINK: ${proj.link}`);
+      if (period) parts.push(`PERÍODO: ${period}`);
+      if (proj.description) {
+        parts.push('DESCRIÇÃO E REALIZAÇÕES:');
+        parts.push(proj.description);
+      }
+      parts.push('---');
+    });
+    parts.push('');
+  }
+
   // CERTIFICATES
   if (cv.certificates && cv.certificates.length > 0) {
     parts.push('=== CERTIFICAÇÕES ===');
@@ -622,6 +645,7 @@ export function compareWithJobDescription(cv: CVData, jobText: string): AtsJobMa
     ...(cv.skills || []),
     ...(cv.experience || []).flatMap((e) => [e.role, e.description]),
     ...(cv.education || []).flatMap((e) => [e.degree, e.description]),
+    ...(cv.projects || []).flatMap((p) => [p.name, p.role, p.description]),
     ...(cv.certificates || []).map((c) => c.name)
   ]
     .filter(Boolean)

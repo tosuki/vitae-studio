@@ -52,6 +52,17 @@ export const sampleData: CVData = {
       description: "Foco em engenharia de software, arquitetura de computadores e algoritmos complexos. Participação no grupo de pesquisa de Interfaces Humano-Computador (IHC)."
     }
   ],
+  projects: [
+    {
+      id: "proj-1",
+      name: "Vitae Studio — AI Resume Builder",
+      role: "Criador & Desenvolvedor Full Stack",
+      link: "github.com/gabrielsilva/vitae-studio",
+      startDate: "2024",
+      endDate: "",
+      description: "Plataforma open source para criação, enriquecimento e validação ATS de currículos profissionais com IA. Desenvolvida com React 19, TypeScript, Fastify e integração com Gemini e OpenAI."
+    }
+  ],
   certificates: [
     {
       id: "cert-1",

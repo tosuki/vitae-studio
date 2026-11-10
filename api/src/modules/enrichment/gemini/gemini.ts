@@ -11,10 +11,13 @@ import { CVResponseSchema } from "./gemini.schema";
 import { CVData } from "../../common/model/cv.model";
 
 import { ENRICHMENT_GEMINI_PROMPT } from "./gemini.prompt";
+import { RESUME_EXTRACTION_PROMPT } from "../parser/resume-extraction.prompt";
 import {
     enrichCVWithOpenAICompatible,
+    extractCVFromTextWithOpenAICompatible,
     extractJsonFromText,
-    normalizeEnrichedCV
+    normalizeEnrichedCV,
+    normalizeExtractedCV
 } from "../ai/openai-compatible.provider";
 import {
     DEFAULT_PROVIDER_BASE_URLS,
@@ -89,6 +92,76 @@ export async function enrichCVWithGemini(
 
         return {
             data: partialCV
+        };
+    } catch (error: any) {
+        return handleGeminiError(error);
+    }
+}
+
+export async function extractCVFromTextWithAI(
+    rawResumeText: string
+): Promise<Result<GeminiQuotaExhaustedError | GeminiInvalidResponseError | ConfigurationError, Omit<CVData, "style">>> {
+    const settingsService = getSettingsService();
+    const settings = await settingsService.getSettings();
+
+    if (!settings || !settingsService.isSettingsConfigured(settings)) {
+        return {
+            err: new ConfigurationError(
+                "Nenhum provedor de IA está configurado. Acesse o botão 'Configurar IA' no topo da plataforma para informar sua API Key."
+            )
+        };
+    }
+
+    if (settings.provider === "gemini") {
+        return extractCVFromTextWithGemini(
+            rawResumeText,
+            settings.apiKey,
+            settings.model || DEFAULT_PROVIDER_MODELS.gemini
+        );
+    }
+
+    const baseUrl =
+        settings.provider === "openai"
+            ? settings.baseUrl || DEFAULT_PROVIDER_BASE_URLS.openai
+            : settings.baseUrl || DEFAULT_PROVIDER_BASE_URLS["openai-compatible"];
+
+    return extractCVFromTextWithOpenAICompatible({
+        rawResumeText,
+        apiKey: settings.apiKey,
+        model: settings.model || DEFAULT_PROVIDER_MODELS[settings.provider],
+        baseUrl
+    });
+}
+
+export async function extractCVFromTextWithGemini(
+    rawResumeText: string,
+    customApiKey?: string,
+    customModel?: string
+): Promise<Result<GeminiQuotaExhaustedError | GeminiInvalidResponseError | ConfigurationError, Omit<CVData, "style">>> {
+    const prompt = RESUME_EXTRACTION_PROMPT(rawResumeText);
+
+    try {
+        const ai = getGeminiClient(customApiKey);
+        const model = (customModel || DEFAULT_PROVIDER_MODELS.gemini).trim();
+
+        const response = await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: CVResponseSchema
+            }
+        });
+
+        if (!response.text) {
+            return { err: new GeminiInvalidResponseError("Não foi possível obter resposta em texto do Gemini durante a extração do currículo.") };
+        }
+
+        const parsed = extractJsonFromText(response.text);
+        const extractedCV = normalizeExtractedCV(parsed);
+
+        return {
+            data: extractedCV
         };
     } catch (error: any) {
         return handleGeminiError(error);

@@ -33,3 +33,15 @@ export class ConfigurationError extends ApplicationError {
         super(message, "CONFIGURATION_ERROR", 500);
     }
 }
+
+export class InvalidFileUploadError extends ApplicationError {
+    constructor(message: string, statusCode = 400) {
+        super(message, "INVALID_FILE_UPLOAD", statusCode);
+    }
+}
+
+export class UnprocessableResumeError extends ApplicationError {
+    constructor(message: string) {
+        super(message, "UNPROCESSABLE_RESUME", 422);
+    }
+}

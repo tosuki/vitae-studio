@@ -39,6 +39,24 @@ export async function createEnrichmentTask(linkedinJobId: string, cv: CVData): P
     }
 }
 
+export async function createResumeParseTask(file: File): Promise<Result<EnrichmentError, TaskResponse>> {
+    try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await client.post<TaskResponse>('/tasks/parse-resume', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
+            timeout: 30000
+        })
+
+        return { data: response.data }
+    } catch (error: unknown) {
+        return { err: handleAxiosError(error) }
+    }
+}
+
 export async function getEnrichmentTask(taskId: string): Promise<Result<EnrichmentError, TaskResponse>> {
     try {
         const response = await client.get<TaskResponse>(`/tasks/${taskId}`)
@@ -61,10 +79,10 @@ function handleAxiosError(error: unknown): EnrichmentError {
         const responseData = error.response.data as any
         const msg = responseData?.message || responseData?.error || error.message
 
-        if (status === 400) {
+        if (status === 400 || status === 413 || status === 415 || status === 422) {
             return { 
                 code: "bad-request", 
-                message: msg || "Dados de entrada inválidos. Verifique as informações enviadas." 
+                message: msg || "Arquivo inválido ou não pôde ser processado. Verifique o formato enviado." 
             }
         }
 
