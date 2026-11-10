@@ -9,7 +9,18 @@ import ProjectsForm from './projects-form.component';
 import CertificatesForm from './certificates-form.component';
 import SkillsForm from './skills-form.component';
 import LanguagesForm from './languages-form.component';
-import { CVData, PersonalData, ExperienceItem, EducationItem, ProjectItem, CertificateItem, LanguageItem, StyleConfig } from '../../types/cv.model';
+import {
+  CVData,
+  PersonalData,
+  ExperienceItem,
+  EducationItem,
+  ProjectItem,
+  CertificateItem,
+  LanguageItem,
+  StyleConfig,
+  CuratedJobResume,
+  ViewMode
+} from '../../types/cv.model';
 import './cv-editor.component.css';
 
 interface CVEditorProps {
@@ -39,6 +50,12 @@ interface CVEditorProps {
   onAddLanguage: () => void;
   onUpdateLanguage: (id: string, field: keyof LanguageItem, value: string) => void;
   onRemoveLanguage: (id: string) => void;
+
+  // Curation props
+  activeMode?: ViewMode;
+  activeJob?: CuratedJobResume | null;
+  onToggleItemInclusion?: (section: 'experience' | 'projects' | 'education' | 'certificates', id: string) => void;
+  onToggleTailoredText?: (section: 'experience' | 'projects', id: string) => void;
 }
 
 interface OpenSections {
@@ -79,41 +96,23 @@ export default function CVEditor({
   onRemoveSkill,
   onAddLanguage,
   onUpdateLanguage,
-  onRemoveLanguage
+  onRemoveLanguage,
+  activeMode = 'master',
+  activeJob = null,
+  onToggleItemInclusion,
+  onToggleTailoredText
 }: CVEditorProps) {
   const [openSections, setOpenSections] = useState<OpenSections>({
     personal: true,
     objective: false,
-    experience: false,
+    experience: true,
     education: false,
-    projects: false,
+    projects: true,
     certificates: false,
     skills: false,
     languages: false,
-    style: true
+    style: false
   });
-
-  const previousSignatureRef = useRef<string>(
-    `${data.personal.fullName}|${data.experience.map(e => e.id).join(',')}|${(data.projects || []).map(p => p.id).join(',')}`
-  );
-
-  useEffect(() => {
-    const currentSignature = `${data.personal.fullName}|${data.experience.map(e => e.id).join(',')}|${(data.projects || []).map(p => p.id).join(',')}`;
-    if (previousSignatureRef.current !== currentSignature) {
-      previousSignatureRef.current = currentSignature;
-      setOpenSections(prev => ({
-        ...prev,
-        personal: true,
-        objective: prev.objective || Boolean(data.objective.trim()),
-        experience: prev.experience || data.experience.length > 0,
-        education: prev.education || data.education.length > 0,
-        projects: prev.projects || (data.projects && data.projects.length > 0),
-        certificates: prev.certificates || data.certificates.length > 0,
-        skills: prev.skills || data.skills.length > 0,
-        languages: prev.languages || data.languages.length > 0
-      }));
-    }
-  }, [data]);
 
   const toggleSection = (section: keyof OpenSections) => {
     setOpenSections(prev => ({
@@ -122,8 +121,36 @@ export default function CVEditor({
     }));
   };
 
+  const isCurated = activeMode === 'curated' && Boolean(activeJob);
+
   return (
     <aside className="cv-editor no-print" style={style}>
+      {/* CURATION MODE BANNER */}
+      {isCurated && activeJob && (
+        <div className="curation-editor-banner">
+          <div className="curation-banner-top">
+            <div className="curation-banner-role">
+              <span>🎯 Vaga: {activeJob.job.roleTitle}</span>
+              {activeJob.job.company && <small style={{ opacity: 0.7 }}>({activeJob.job.company})</small>}
+            </div>
+            <div className="curation-banner-badges">
+              <span className="curation-banner-score">{activeJob.curation.matchScore}% Match ATS</span>
+              <span className="curation-a4-tag">1 Página A4</span>
+            </div>
+          </div>
+          <p className="curation-banner-helper">
+            {activeJob.curation.tailoredObjective}
+          </p>
+          {activeJob.curation.matchedKeywords.length > 0 && (
+            <div className="curation-kw-chips">
+              {activeJob.curation.matchedKeywords.slice(0, 8).map(kw => (
+                <span key={kw} className="curation-kw-chip">✓ {kw}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* 1. VISUAL & ESTILO */}
       <FormSection
         title="Visual & Estilo"
@@ -186,6 +213,9 @@ export default function CVEditor({
           onUpdateExperience={onUpdateExperience}
           onRemoveExperience={onRemoveExperience}
           onMoveExperience={onMoveExperience}
+          curationMap={isCurated ? activeJob?.curation.experience : undefined}
+          onToggleInclusion={(id) => onToggleItemInclusion?.('experience', id)}
+          onToggleTailoredText={(id) => onToggleTailoredText?.('experience', id)}
         />
       </FormSection>
 
@@ -207,6 +237,8 @@ export default function CVEditor({
           onUpdateEducation={onUpdateEducation}
           onRemoveEducation={onRemoveEducation}
           onMoveEducation={onMoveEducation}
+          curationMap={isCurated ? activeJob?.curation.education : undefined}
+          onToggleInclusion={(id) => onToggleItemInclusion?.('education', id)}
         />
       </FormSection>
 
@@ -228,6 +260,9 @@ export default function CVEditor({
           onUpdateProject={onUpdateProject}
           onRemoveProject={onRemoveProject}
           onMoveProject={onMoveProject}
+          curationMap={isCurated ? activeJob?.curation.projects : undefined}
+          onToggleInclusion={(id) => onToggleItemInclusion?.('projects', id)}
+          onToggleTailoredText={(id) => onToggleTailoredText?.('projects', id)}
         />
       </FormSection>
 
@@ -249,6 +284,8 @@ export default function CVEditor({
           onUpdateCertificate={onUpdateCertificate}
           onRemoveCertificate={onRemoveCertificate}
           onMoveCertificate={onMoveCertificate}
+          curationMap={isCurated ? activeJob?.curation.certificates : undefined}
+          onToggleInclusion={(id) => onToggleItemInclusion?.('certificates', id)}
         />
       </FormSection>
 

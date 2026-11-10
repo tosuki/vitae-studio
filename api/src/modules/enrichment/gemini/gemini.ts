@@ -8,14 +8,18 @@ import {
 
 import { LinkedinJob } from "../model/linkedin-job.model";
 import { CVResponseSchema } from "./gemini.schema";
-import { CVData } from "../../common/model/cv.model";
+import { CVData, TargetedCuration } from "../../common/model/cv.model";
 
 import { ENRICHMENT_GEMINI_PROMPT } from "./gemini.prompt";
 import { RESUME_EXTRACTION_PROMPT } from "../parser/resume-extraction.prompt";
+import { JobCurationInput, CURATION_GEMINI_PROMPT } from "./curation.prompt";
+import { CurationResponseSchema } from "./curation.schema";
 import {
+    curateCVWithOpenAICompatible,
     enrichCVWithOpenAICompatible,
     extractCVFromTextWithOpenAICompatible,
     extractJsonFromText,
+    normalizeCuratedResult,
     normalizeEnrichedCV,
     normalizeExtractedCV
 } from "../ai/openai-compatible.provider";
@@ -162,6 +166,80 @@ export async function extractCVFromTextWithGemini(
 
         return {
             data: extractedCV
+        };
+    } catch (error: any) {
+        return handleGeminiError(error);
+    }
+}
+
+export async function curateCVWithAI(
+    job: JobCurationInput,
+    cv: CVData
+): Promise<Result<GeminiQuotaExhaustedError | GeminiInvalidResponseError | ConfigurationError, TargetedCuration>> {
+    const settingsService = getSettingsService();
+    const settings = await settingsService.getSettings();
+
+    if (!settings || !settingsService.isSettingsConfigured(settings)) {
+        return {
+            err: new ConfigurationError(
+                "Nenhum provedor de IA está configurado. Acesse o botão 'Configurar IA' no topo da plataforma para informar sua API Key."
+            )
+        };
+    }
+
+    if (settings.provider === "gemini") {
+        return curateCVWithGemini(
+            job,
+            cv,
+            settings.apiKey,
+            settings.model || DEFAULT_PROVIDER_MODELS.gemini
+        );
+    }
+
+    const baseUrl =
+        settings.provider === "openai"
+            ? settings.baseUrl || DEFAULT_PROVIDER_BASE_URLS.openai
+            : settings.baseUrl || DEFAULT_PROVIDER_BASE_URLS["openai-compatible"];
+
+    return curateCVWithOpenAICompatible({
+        job,
+        cv,
+        apiKey: settings.apiKey,
+        model: settings.model || DEFAULT_PROVIDER_MODELS[settings.provider],
+        baseUrl
+    });
+}
+
+export async function curateCVWithGemini(
+    job: JobCurationInput,
+    cv: CVData,
+    customApiKey?: string,
+    customModel?: string
+): Promise<Result<GeminiQuotaExhaustedError | GeminiInvalidResponseError | ConfigurationError, TargetedCuration>> {
+    const prompt = CURATION_GEMINI_PROMPT(cv, job);
+
+    try {
+        const ai = getGeminiClient(customApiKey);
+        const model = (customModel || DEFAULT_PROVIDER_MODELS.gemini).trim();
+
+        const response = await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: CurationResponseSchema
+            }
+        });
+
+        if (!response.text) {
+            return { err: new GeminiInvalidResponseError("Não foi possível obter resposta em texto do Gemini durante a curadoria da vaga.") };
+        }
+
+        const parsed = extractJsonFromText(response.text);
+        const curationResult = normalizeCuratedResult(parsed, cv, job);
+
+        return {
+            data: curationResult
         };
     } catch (error: any) {
         return handleGeminiError(error);

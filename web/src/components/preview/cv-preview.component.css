@@ -445,6 +445,45 @@
   gap: calc(6px * var(--preview-spacing-multiplier));
 }
 
+/* A4 PAGE LIMIT INDICATOR */
+.cv-preview-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.a4-page-indicator {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+}
+
+.a4-page-indicator.perfect {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.a4-page-indicator.overflow {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  animation: pulseOverflow 2s infinite;
+}
+
+@keyframes pulseOverflow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
 /* Skills display in ATS theme: clean text list with subtle borders / pills */
 .theme-ats .cv-skills-grid {
   display: flex;

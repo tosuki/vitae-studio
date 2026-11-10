@@ -1,7 +1,8 @@
 import axios, { isAxiosError } from "axios";
-import { CVData } from "../../common/model/cv.model";
+import { CVData, TargetedCuration, ItemCuration } from "../../common/model/cv.model";
 import { ENRICHMENT_GEMINI_PROMPT } from "../gemini/gemini.prompt";
 import { RESUME_EXTRACTION_PROMPT } from "../parser/resume-extraction.prompt";
+import { JobCurationInput, CURATION_GEMINI_PROMPT } from "../gemini/curation.prompt";
 import { enrichedCVSchema } from "../../http/schema/task.schema";
 import {
     ConfigurationError,
@@ -426,6 +427,195 @@ export async function extractCVFromTextWithOpenAICompatible(params: {
         const validatedCV = normalizeExtractedCV(parsed);
 
         return { data: validatedCV };
+    } catch (error: unknown) {
+        return handleOpenAICompatibleError(error);
+    }
+}
+
+export function normalizeCuratedResult(
+    raw: any,
+    originalCv: CVData,
+    job: JobCurationInput
+): TargetedCuration {
+    const matchScore = typeof raw?.matchScore === "number" && !isNaN(raw.matchScore)
+        ? Math.min(100, Math.max(0, Math.round(raw.matchScore)))
+        : 80;
+
+    const matchedKeywords = Array.isArray(raw?.matchedKeywords)
+        ? raw.matchedKeywords.map((k: unknown) => String(k || "").trim()).filter(Boolean)
+        : [];
+
+    const missingKeywords = Array.isArray(raw?.missingKeywords)
+        ? raw.missingKeywords.map((k: unknown) => String(k || "").trim()).filter(Boolean)
+        : [];
+
+    const tailoredObjective = typeof raw?.tailoredObjective === "string" && raw.tailoredObjective.trim()
+        ? raw.tailoredObjective.trim()
+        : originalCv.objective;
+
+    // Experience curation
+    const expMap: Record<string, ItemCuration> = {};
+    const rawExpList = Array.isArray(raw?.experienceCuration) ? raw.experienceCuration : [];
+    const rawExpLookup = new Map<string, any>();
+    for (const item of rawExpList) {
+        if (item && item.id) {
+            rawExpLookup.set(String(item.id), item);
+        }
+    }
+
+    originalCv.experience.forEach((exp, idx) => {
+        const found = rawExpLookup.get(exp.id);
+        if (found) {
+            expMap[exp.id] = {
+                included: Boolean(found.included),
+                relevanceScore: typeof found.relevanceScore === "number" ? found.relevanceScore : (idx < 2 ? 90 : 50),
+                tailoredDescription: typeof found.tailoredDescription === "string" && found.tailoredDescription.trim()
+                    ? found.tailoredDescription.trim()
+                    : exp.description
+            };
+        } else {
+            expMap[exp.id] = {
+                included: idx < 2,
+                relevanceScore: idx < 2 ? 80 : 40,
+                tailoredDescription: exp.description
+            };
+        }
+    });
+
+    // Project curation
+    const projMap: Record<string, ItemCuration> = {};
+    const rawProjList = Array.isArray(raw?.projectCuration) ? raw.projectCuration : [];
+    const rawProjLookup = new Map<string, any>();
+    for (const item of rawProjList) {
+        if (item && item.id) {
+            rawProjLookup.set(String(item.id), item);
+        }
+    }
+
+    (originalCv.projects || []).forEach((proj, idx) => {
+        const found = rawProjLookup.get(proj.id);
+        if (found) {
+            projMap[proj.id] = {
+                included: Boolean(found.included),
+                relevanceScore: typeof found.relevanceScore === "number" ? found.relevanceScore : (idx === 0 ? 90 : 50),
+                tailoredDescription: typeof found.tailoredDescription === "string" && found.tailoredDescription.trim()
+                    ? found.tailoredDescription.trim()
+                    : proj.description
+            };
+        } else {
+            projMap[proj.id] = {
+                included: idx === 0,
+                relevanceScore: idx === 0 ? 80 : 40,
+                tailoredDescription: proj.description
+            };
+        }
+    });
+
+    // Education curation
+    const eduMap: Record<string, ItemCuration> = {};
+    const rawEduList = Array.isArray(raw?.educationCuration) ? raw.educationCuration : [];
+    const rawEduLookup = new Map<string, any>();
+    for (const item of rawEduList) {
+        if (item && item.id) {
+            rawEduLookup.set(String(item.id), item);
+        }
+    }
+
+    originalCv.education.forEach((edu, idx) => {
+        const found = rawEduLookup.get(edu.id);
+        eduMap[edu.id] = {
+            included: found ? Boolean(found.included) : idx === 0,
+            relevanceScore: found && typeof found.relevanceScore === "number" ? found.relevanceScore : 90
+        };
+    });
+
+    // Certificates curation
+    const certMap: Record<string, ItemCuration> = {};
+    const rawCertList = Array.isArray(raw?.certificateCuration) ? raw.certificateCuration : [];
+    const rawCertLookup = new Map<string, any>();
+    for (const item of rawCertList) {
+        if (item && item.id) {
+            rawCertLookup.set(String(item.id), item);
+        }
+    }
+
+    originalCv.certificates.forEach((cert, idx) => {
+        const found = rawCertLookup.get(cert.id);
+        certMap[cert.id] = {
+            included: found ? Boolean(found.included) : idx < 2,
+            relevanceScore: found && typeof found.relevanceScore === "number" ? found.relevanceScore : 70
+        };
+    });
+
+    // Selected skills
+    const rawSkills = Array.isArray(raw?.selectedSkills)
+        ? raw.selectedSkills.map((s: unknown) => String(s || "").trim()).filter(Boolean)
+        : [];
+    const selectedSkills = rawSkills.length > 0 ? rawSkills.slice(0, 14) : originalCv.skills.slice(0, 10);
+
+    return {
+        jobTitle: job.roleTitle,
+        company: job.company,
+        matchScore,
+        matchedKeywords,
+        missingKeywords,
+        tailoredObjective,
+        experience: expMap,
+        projects: projMap,
+        education: eduMap,
+        certificates: certMap,
+        selectedSkills
+    };
+}
+
+export async function curateCVWithOpenAICompatible(params: {
+    job: JobCurationInput;
+    cv: CVData;
+    apiKey: string;
+    model: string;
+    baseUrl: string;
+}): Promise<Result<GeminiQuotaExhaustedError | GeminiInvalidResponseError | ConfigurationError, TargetedCuration>> {
+    const { job, cv, apiKey, model, baseUrl } = params;
+
+    if (!baseUrl || !baseUrl.trim()) {
+        return { err: new ConfigurationError("A Base URL do provedor compatível com OpenAI não foi configurada.") };
+    }
+
+    if (!model || !model.trim()) {
+        return { err: new ConfigurationError("O modelo de IA não foi configurado.") };
+    }
+
+    const prompt = CURATION_GEMINI_PROMPT(cv, job);
+
+    try {
+        const response = await postChatCompletionsWithFallback(baseUrl, apiKey, {
+            model: model.trim(),
+            messages: [
+                {
+                    role: "system",
+                    content: "Você é um recrutador executivo e especialista em ATS. O currículo gerado deve caber estritamente em 1 folha A4. Responda EXCLUSIVAMENTE com um JSON estruturado seguindo o schema solicitado, sem texto adicional e sem markdown."
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            temperature: 0.2,
+            response_format: { type: "json_object" }
+        });
+
+        const rawContent = response.data?.choices?.[0]?.message?.content;
+
+        if (!rawContent || typeof rawContent !== "string") {
+            return {
+                err: new GeminiInvalidResponseError("O provedor de IA retornou uma resposta vazia durante a curadoria da vaga.")
+            };
+        }
+
+        const parsed = extractJsonFromText(rawContent);
+        const curationResult = normalizeCuratedResult(parsed, cv, job);
+
+        return { data: curationResult };
     } catch (error: unknown) {
         return handleOpenAICompatibleError(error);
     }

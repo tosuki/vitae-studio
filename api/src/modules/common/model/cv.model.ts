@@ -68,3 +68,24 @@ export interface CVData {
     languages: LanguageItem[];
     style: StyleConfig;
 }
+
+export interface ItemCuration {
+    included: boolean;
+    relevanceScore?: number;
+    tailoredDescription?: string;
+}
+
+export interface TargetedCuration {
+    jobTitle: string;
+    company?: string;
+    matchScore: number;
+    matchedKeywords: string[];
+    missingKeywords: string[];
+    tailoredObjective: string;
+    experience: Record<string, ItemCuration>;
+    projects: Record<string, ItemCuration>;
+    education: Record<string, ItemCuration>;
+    certificates: Record<string, ItemCuration>;
+    selectedSkills: string[];
+}
+
