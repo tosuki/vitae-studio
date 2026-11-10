@@ -70,3 +70,41 @@ export interface CVData {
   languages: LanguageItem[];
   style: StyleConfig;
 }
+
+export type MasterProfile = CVData;
+
+export interface ItemCuration {
+  included: boolean;
+  relevanceScore?: number;
+  tailoredDescription?: string;
+  useTailoredText?: boolean;
+}
+
+export interface TargetedCuration {
+  jobTitle: string;
+  company?: string;
+  matchScore: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  tailoredObjective: string;
+  experience: Record<string, ItemCuration>;
+  projects: Record<string, ItemCuration>;
+  education: Record<string, ItemCuration>;
+  certificates: Record<string, ItemCuration>;
+  selectedSkills: string[];
+}
+
+export interface JobTarget {
+  id: string;
+  roleTitle: string;
+  company?: string;
+  jobDescription: string;
+  createdAt: number;
+}
+
+export interface CuratedJobResume {
+  job: JobTarget;
+  curation: TargetedCuration;
+}
+
+export type ViewMode = 'master' | 'curated';

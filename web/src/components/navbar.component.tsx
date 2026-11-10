@@ -1,5 +1,5 @@
 import { useRef, ChangeEvent } from 'react';
-import { CVData } from '../types/cv.model';
+import { CVData, CuratedJobResume, ViewMode } from '../types/cv.model';
 import './navbar.component.css';
 
 interface NavbarProps {
@@ -14,6 +14,15 @@ interface NavbarProps {
   onOpenAtsValidation: () => void;
   onOpenSettings: () => void;
   isAIConfigured?: boolean;
+
+  // New Curation Context props
+  activeMode: ViewMode;
+  savedJobs: CuratedJobResume[];
+  activeJobId: string | null;
+  onSelectMaster: () => void;
+  onSelectJob: (jobId: string) => void;
+  onRemoveJob: (jobId: string) => void;
+  onOpenCurateJob: () => void;
 }
 
 export default function Navbar({
@@ -27,7 +36,14 @@ export default function Navbar({
   onOpenEnrichment,
   onOpenAtsValidation,
   onOpenSettings,
-  isAIConfigured = false
+  isAIConfigured = false,
+  activeMode,
+  savedJobs,
+  activeJobId,
+  onSelectMaster,
+  onSelectJob,
+  onRemoveJob,
+  onOpenCurateJob
 }: NavbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,7 +59,6 @@ export default function Navbar({
           const data = JSON.parse(result) as CVData;
           onImportJson(data);
         }
-        // Reset file input value so same file can be selected again
         event.target.value = '';
       } catch {
         onAlert(
@@ -66,6 +81,50 @@ export default function Navbar({
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
         <span className="navbar-title">Vitae <span className="badge">Studio</span></span>
+      </div>
+
+      {/* CONTEXT SWITCHER: MASTER PROFILE VS CURATED JOB RESUMES */}
+      <div className="navbar-mode-switcher">
+        <button
+          type="button"
+          className={`mode-pill ${activeMode === 'master' ? 'active' : ''}`}
+          onClick={onSelectMaster}
+          title="Ver e editar todo o histórico acumulado (sem limite de páginas)"
+        >
+          <span>💼 Minha Bagagem</span>
+        </button>
+
+        {savedJobs.map(entry => (
+          <div
+            key={entry.job.id}
+            className={`mode-pill ${activeMode === 'curated' && activeJobId === entry.job.id ? 'active' : ''}`}
+            onClick={() => onSelectJob(entry.job.id)}
+            title={`Ver currículo de 1 página calibrado para ${entry.job.roleTitle}`}
+          >
+            <span>🎯 {entry.job.roleTitle}</span>
+            <span className="mode-pill-score">{entry.curation.matchScore}%</span>
+            <button
+              type="button"
+              className="mode-pill-remove"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveJob(entry.job.id);
+              }}
+              title="Excluir currículo desta vaga"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          className="btn-new-job"
+          onClick={onOpenCurateJob}
+          title="Curar experiências e gerar um novo currículo de 1 página A4 com IA"
+        >
+          <span>+ Otimizar para Vaga (1 pág A4)</span>
+        </button>
       </div>
 
       <div className="navbar-actions">
@@ -104,7 +163,7 @@ export default function Navbar({
             onClick={onOpenEnrichment}
             title="Otimizar currículo para vaga do LinkedIn com IA"
           >
-            Enriquecer
+            LinkedIn
           </button>
 
           <button
@@ -127,13 +186,7 @@ export default function Navbar({
             onClick={onLoadSample}
             title="Preencher com dados fictícios profissionais"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="12" y1="18" x2="12" y2="12"></line>
-              <line x1="9" y1="15" x2="15" y2="15"></line>
-            </svg>
-            Carregar Exemplo
+            Exemplo
           </button>
 
           <button
@@ -142,10 +195,6 @@ export default function Navbar({
             onClick={onClear}
             title="Limpar todos os campos do currículo"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
             Limpar
           </button>
         </div>
@@ -157,12 +206,7 @@ export default function Navbar({
             onClick={() => fileInputRef.current?.click()}
             title="Importar dados de um arquivo JSON"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            Importar JSON
+            Importar
           </button>
           <input
             type="file"
@@ -178,12 +222,7 @@ export default function Navbar({
             onClick={onExportJson}
             title="Exportar dados atuais do currículo como arquivo JSON"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Exportar JSON
+            Exportar
           </button>
         </div>
 
@@ -191,7 +230,7 @@ export default function Navbar({
           type="button"
           className="btn btn-primary"
           onClick={onPrint}
-          title="Imprimir ou Salvar currículo como PDF"
+          title="Imprimir ou Salvar currículo como PDF de 1 página"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 6 2 18 2 18 9"></polyline>

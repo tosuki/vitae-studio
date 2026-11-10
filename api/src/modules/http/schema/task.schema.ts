@@ -74,6 +74,26 @@ export const cvSchema = z.object({
 
 export const enrichedCVSchema = cvSchema.omit({ style: true });
 
+export const itemCurationSchema = z.object({
+    included: z.boolean(),
+    relevanceScore: z.number().optional(),
+    tailoredDescription: z.string().optional()
+});
+
+export const curationResultSchema = z.object({
+    jobTitle: z.string(),
+    company: z.string().optional(),
+    matchScore: z.number(),
+    matchedKeywords: z.array(z.string()),
+    missingKeywords: z.array(z.string()),
+    tailoredObjective: z.string(),
+    experience: z.record(z.string(), itemCurationSchema),
+    projects: z.record(z.string(), itemCurationSchema),
+    education: z.record(z.string(), itemCurationSchema),
+    certificates: z.record(z.string(), itemCurationSchema),
+    selectedSkills: z.array(z.string())
+});
+
 export const createTaskSchema: FastifySchema = {
     body: z.object({
         linkedinJobId: z.string().min(1, "linkedinJobId é obrigatório"),
@@ -85,6 +105,29 @@ export const createTaskSchema: FastifySchema = {
             status: z.string(),
             linkedinJobId: z.string(),
             enrichedCV: enrichedCVSchema.nullable(),
+            curationResult: curationResultSchema.nullable().optional(),
+            errorMessage: z.string().nullable(),
+            updatedAt: z.number()
+        })
+    }
+}
+
+export const curateTaskSchema: FastifySchema = {
+    body: z.object({
+        job: z.object({
+            roleTitle: z.string().min(2, "Cargo alvo é obrigatório"),
+            jobDescription: z.string().min(10, "Descrição da vaga deve ter no mínimo 10 caracteres"),
+            company: z.string().optional()
+        }),
+        cv: cvSchema
+    }),
+    response: {
+        201: z.object({
+            id: z.string(),
+            status: z.string(),
+            linkedinJobId: z.string(),
+            enrichedCV: enrichedCVSchema.nullable(),
+            curationResult: curationResultSchema.nullable().optional(),
             errorMessage: z.string().nullable(),
             updatedAt: z.number()
         })
@@ -101,6 +144,7 @@ export const getTaskSchema: FastifySchema = {
             status: z.string(),
             linkedinJobId: z.string(),
             enrichedCV: enrichedCVSchema.nullable(),
+            curationResult: curationResultSchema.nullable().optional(),
             errorMessage: z.string().nullable(),
             updatedAt: z.number()
         }),
@@ -117,6 +161,7 @@ export const parseResumeTaskSchema: FastifySchema = {
             status: z.string(),
             linkedinJobId: z.string(),
             enrichedCV: enrichedCVSchema.nullable(),
+            curationResult: curationResultSchema.nullable().optional(),
             errorMessage: z.string().nullable(),
             updatedAt: z.number()
         }),

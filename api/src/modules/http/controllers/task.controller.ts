@@ -1,6 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { getTaskService } from "../../enrichment/factory";
 import { CreateTaskDTO } from "../../enrichment/dtos/create-task.dto";
+import { CVData } from "../../common/model/cv.model";
+import { JobCurationInput } from "../../enrichment/gemini/curation.prompt";
 import { validateResumeFile } from "../../enrichment/parser/file-validator";
 import { extractResumeTextFromFile } from "../../enrichment/parser/text-extractor.service";
 import { ApplicationError } from "../../../util/errors";
@@ -12,6 +14,16 @@ export class TaskController {
     ) {
         const taskService = getTaskService();
         const task = await taskService.createTask(request.body);
+
+        return reply.status(201).send(task);
+    }
+
+    public async curate(
+        request: FastifyRequest<{ Body: { job: JobCurationInput; cv: CVData } }>,
+        reply: FastifyReply
+    ) {
+        const taskService = getTaskService();
+        const task = await taskService.createCurationTask(request.body.job, request.body.cv);
 
         return reply.status(201).send(task);
     }

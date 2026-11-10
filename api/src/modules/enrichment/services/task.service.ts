@@ -5,6 +5,7 @@ import { CreateTaskDTO } from "../dtos/create-task.dto";
 import { TaskResponseDTO } from "../dtos/task-response.dto";
 import { Task } from "../model/task.model";
 import { CVData } from "../../common/model/cv.model";
+import { JobCurationInput } from "../gemini/curation.prompt";
 
 export class TaskService {
     constructor(
@@ -57,6 +58,31 @@ export class TaskService {
         return this.mapToResponseDTO(task);
     }
 
+    public async createCurationTask(job: JobCurationInput, cv: CVData): Promise<TaskResponseDTO> {
+        const taskId: string = uuidv4();
+        const now: number = Date.now();
+
+        const task: Task = {
+            id: taskId,
+            status: "PENDING",
+            linkedinJobId: `curation:${job.roleTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
+            rawHtml: null,
+            jobTitle: job.roleTitle,
+            jobDescription: job.jobDescription,
+            cv,
+            enrichedCV: null,
+            curationResult: null,
+            errorMessage: null,
+            createdAt: now,
+            updatedAt: now
+        };
+
+        await this.redis.set(`tasks:${taskId}`, JSON.stringify(task), "EX", 3600);
+        await this.queueManager.addCurationJob(taskId, job, cv);
+
+        return this.mapToResponseDTO(task);
+    }
+
     public async getTask(taskId: string): Promise<TaskResponseDTO | null> {
         const taskDataRaw: string | null = await this.redis.get(`tasks:${taskId}`);
         if (!taskDataRaw) {
@@ -91,6 +117,7 @@ export class TaskService {
             status: task.status,
             linkedinJobId: task.linkedinJobId,
             enrichedCV: task.enrichedCV,
+            curationResult: task.curationResult,
             errorMessage: task.errorMessage,
             updatedAt: task.updatedAt
         };
