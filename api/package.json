@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",
+    "@fastify/multipart": "^10.1.8",
     "@google/genai": "^2.10.0",
     "axios": "^1.18.1",
     "axios-cookiejar-support": "^7.0.0",
@@ -31,6 +32,7 @@
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "tough-cookie": "^6.0.1",
+    "unpdf": "^2.1.0",
     "uuid": "^14.0.0",
     "zod": "^4.4.3"
   },

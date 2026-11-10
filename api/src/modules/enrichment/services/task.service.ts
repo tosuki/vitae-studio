@@ -34,6 +34,29 @@ export class TaskService {
         return this.mapToResponseDTO(task);
     }
 
+    public async createResumeParseTask(rawResumeText: string, sourceFilename = "resume-upload"): Promise<TaskResponseDTO> {
+        const taskId: string = uuidv4();
+        const now: number = Date.now();
+
+        const task: Task = {
+            id: taskId,
+            status: "PENDING",
+            linkedinJobId: `upload:${sourceFilename}`,
+            rawHtml: null,
+            rawResumeText,
+            cv: null,
+            enrichedCV: null,
+            errorMessage: null,
+            createdAt: now,
+            updatedAt: now
+        };
+
+        await this.redis.set(`tasks:${taskId}`, JSON.stringify(task), "EX", 3600);
+        await this.queueManager.addResumeParseJob(taskId, rawResumeText);
+
+        return this.mapToResponseDTO(task);
+    }
+
     public async getTask(taskId: string): Promise<TaskResponseDTO | null> {
         const taskDataRaw: string | null = await this.redis.get(`tasks:${taskId}`);
         if (!taskDataRaw) {

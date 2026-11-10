@@ -125,14 +125,16 @@
 
 /* EXPERIENCE & EDUCATION ITEMS */
 .experience-list,
-.education-list {
+.education-list,
+.projects-list {
   display: flex;
   flex-direction: column;
   gap: calc(14px * var(--preview-spacing-multiplier));
 }
 
 .cv-experience-item,
-.cv-education-item {
+.cv-education-item,
+.cv-project-item {
   display: flex;
   flex-direction: column;
   gap: calc(4px * var(--preview-spacing-multiplier));
@@ -181,6 +183,18 @@
 
 .cv-item-meta-separator {
   color: #cbd5e1;
+}
+
+.cv-project-link {
+  color: var(--preview-accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+
+.cv-project-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
 }
 
 .cv-item-description {

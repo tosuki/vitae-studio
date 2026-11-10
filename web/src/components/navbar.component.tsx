@@ -7,6 +7,7 @@ interface NavbarProps {
   onClear: () => void;
   onExportJson: () => void;
   onImportJson: (data: CVData) => void;
+  onOpenResumeUpload: () => void;
   onPrint: () => void;
   onAlert: (title: string, message: string) => void;
   onOpenEnrichment: () => void;
@@ -20,6 +21,7 @@ export default function Navbar({
   onClear,
   onExportJson,
   onImportJson,
+  onOpenResumeUpload,
   onPrint,
   onAlert,
   onOpenEnrichment,
@@ -79,6 +81,21 @@ export default function Navbar({
               <polyline points="9 12 11 14 15 10"></polyline>
             </svg>
             Validar ATS
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onOpenResumeUpload}
+            title="Importar e extrair currículo a partir de arquivo PDF ou TXT usando IA"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <path d="M12 18v-6"></path>
+              <path d="m9 15 3-3 3 3"></path>
+            </svg>
+            Importar PDF/TXT
           </button>
 
           <button

@@ -1,13 +1,17 @@
 import { Job, UnrecoverableError } from "bullmq";
-import { enrichCVWithAI } from "./gemini";
+import { enrichCVWithAI, extractCVFromTextWithAI } from "./gemini";
 import { getTaskService } from "../factory";
 import { TaskService } from "../services/task.service";
 import { GeminiQuotaExhaustedError } from "../../../util/errors";
 import { logger } from "../../../util/logger";
 import { CVData } from "../../common/model/cv.model";
 
-export const geminiWorkerHandler = async (job: Job<{ taskId: string; rawHtml: string, cv: CVData }>): Promise<void> => {
-    const { taskId, rawHtml, cv } = job.data;
+export type GeminiJobData =
+    | { taskId: string; rawHtml: string; cv: CVData; rawResumeText?: undefined }
+    | { taskId: string; rawResumeText: string; rawHtml?: undefined; cv?: undefined };
+
+export const geminiWorkerHandler = async (job: Job<GeminiJobData>): Promise<void> => {
+    const { taskId } = job.data;
 
     const taskService: TaskService = getTaskService();
 
@@ -15,11 +19,16 @@ export const geminiWorkerHandler = async (job: Job<{ taskId: string; rawHtml: st
         await taskService.updateTask(taskId, { status: "EXTRACTING_GEMINI" });
     }
 
-    const result = await enrichCVWithAI(rawHtml, cv);
+    const rawResumeText = job.data.rawResumeText;
+    const isResumeParse = typeof rawResumeText === "string";
+    const result = isResumeParse
+        ? await extractCVFromTextWithAI(rawResumeText)
+        : await enrichCVWithAI(job.data.rawHtml!, job.data.cv!);
 
     if (result.err) {
         const attemptsLimit: number = job.opts.attempts || 1;
         const isLastAttempt: boolean = job.attemptsMade >= attemptsLimit - 1;
+        const actionLabel = isResumeParse ? "Extração de currículo por IA" : "Otimização por IA";
 
         logger.warn(result.err, `Integração de IA falhou para a Task ${taskId} (Tentativa ${job.attemptsMade + 1}/${attemptsLimit})`);
 
@@ -27,8 +36,8 @@ export const geminiWorkerHandler = async (job: Job<{ taskId: string; rawHtml: st
 
         if (!isRecoverable || isLastAttempt) {
             const errorMessage = isLastAttempt
-                ? `Otimização por IA falhou definitivamente após ${attemptsLimit} tentativas: ${result.err.message}`
-                : `Falha na otimização por IA: ${result.err.message}`;
+                ? `${actionLabel} falhou definitivamente após ${attemptsLimit} tentativas: ${result.err.message}`
+                : `Falha na ${actionLabel.toLowerCase()}: ${result.err.message}`;
 
             await taskService.updateTask(taskId, {
                 status: "FAILED",

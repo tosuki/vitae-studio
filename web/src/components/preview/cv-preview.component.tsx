@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, CSSProperties } from 'react';
 import HeaderPreview from './header-preview.component';
 import ExperiencePreview from './experience-preview.component';
 import EducationPreview from './education-preview.component';
+import ProjectsPreview from './projects-preview.component';
 import CertificatesPreview from './certificates-preview.component';
 import SkillsLanguagesPreview from './skills-languages-preview.component';
 import { CVData } from '../../types/cv.model';
@@ -12,7 +13,7 @@ interface CVPreviewProps {
 }
 
 export default function CVPreview({ data }: CVPreviewProps) {
-  const { personal, objective, experience, education, certificates, skills, languages, style } = data;
+  const { personal, objective, experience, education, projects, certificates, skills, languages, style } = data;
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -92,6 +93,9 @@ export default function CVPreview({ data }: CVPreviewProps) {
 
         {/* FORMAÇÃO ACADÊMICA */}
         {education.length > 0 && <EducationPreview educationList={education} />}
+
+        {/* PROJETOS PESSOAIS */}
+        {projects && projects.length > 0 && <ProjectsPreview projectList={projects} />}
 
         {/* CERTIFICADOS */}
         {certificates.length > 0 && <CertificatesPreview certificatesList={certificates} />}

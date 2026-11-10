@@ -30,6 +30,16 @@ const educationItemSchema = z.object({
     description: z.string()
 });
 
+const projectItemSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    role: z.string(),
+    link: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+    description: z.string()
+});
+
 const certificateItemSchema = z.object({
     id: z.string(),
     name: z.string(),
@@ -55,6 +65,7 @@ export const cvSchema = z.object({
     objective: z.string(),
     experience: z.array(experienceItemSchema),
     education: z.array(educationItemSchema),
+    projects: z.array(projectItemSchema),
     certificates: z.array(certificateItemSchema),
     skills: z.array(z.string()),
     languages: z.array(languageItemSchema),
@@ -96,5 +107,23 @@ export const getTaskSchema: FastifySchema = {
         404: z.object({
             error: z.string()
         })
+    }
+}
+
+export const parseResumeTaskSchema: FastifySchema = {
+    response: {
+        201: z.object({
+            id: z.string(),
+            status: z.string(),
+            linkedinJobId: z.string(),
+            enrichedCV: enrichedCVSchema.nullable(),
+            errorMessage: z.string().nullable(),
+            updatedAt: z.number()
+        }),
+        400: z.object({ error: z.string() }),
+        413: z.object({ error: z.string() }),
+        415: z.object({ error: z.string() }),
+        422: z.object({ error: z.string() }),
+        500: z.object({ error: z.string() })
     }
 }

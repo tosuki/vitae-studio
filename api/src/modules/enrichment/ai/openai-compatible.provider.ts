@@ -1,6 +1,7 @@
 import axios, { isAxiosError } from "axios";
 import { CVData } from "../../common/model/cv.model";
 import { ENRICHMENT_GEMINI_PROMPT } from "../gemini/gemini.prompt";
+import { RESUME_EXTRACTION_PROMPT } from "../parser/resume-extraction.prompt";
 import { enrichedCVSchema } from "../../http/schema/task.schema";
 import {
     ConfigurationError,
@@ -86,6 +87,18 @@ export function normalizeEnrichedCV(raw: any, originalCv: CVData): Omit<CVData, 
         }))
         : originalCv.education;
 
+    const projects = Array.isArray(raw?.projects)
+        ? raw.projects.map((item: any, idx: number) => ({
+            id: asStr(item?.id, originalCv.projects?.[idx]?.id || String(idx + 1)),
+            name: asStr(item?.name),
+            role: asStr(item?.role),
+            link: normalizeSocialUrl(item?.link),
+            startDate: asStr(item?.startDate),
+            endDate: asStr(item?.endDate),
+            description: asStr(item?.description)
+        }))
+        : (originalCv.projects || []);
+
     const certificates = Array.isArray(raw?.certificates)
         ? raw.certificates.map((item: any, idx: number) => ({
             id: asStr(item?.id, originalCv.certificates[idx]?.id || String(idx + 1)),
@@ -112,6 +125,160 @@ export function normalizeEnrichedCV(raw: any, originalCv: CVData): Omit<CVData, 
         objective: asStr(raw?.objective, originalCv.objective),
         experience,
         education,
+        projects,
+        certificates,
+        skills,
+        languages
+    };
+
+    return enrichedCVSchema.parse(candidate);
+}
+
+const VALID_LANGUAGE_LEVELS = new Set(["Nativo", "Fluente", "Avançado", "Intermediário", "Básico"]);
+
+export function normalizeLanguageLevel(rawLevel: unknown): string {
+    const val = typeof rawLevel === "string" ? rawLevel.trim() : "";
+    if (VALID_LANGUAGE_LEVELS.has(val)) {
+        return val;
+    }
+
+    const lower = val.toLowerCase();
+    if (lower.includes("nativ") || lower.includes("matern") || lower.includes("native") || lower.includes("mother")) {
+        return "Nativo";
+    }
+    if (lower.includes("fluent") || lower.includes("c2") || lower.includes("proficien")) {
+        return "Fluente";
+    }
+    if (lower.includes("avan") || lower.includes("c1") || lower.includes("advanced")) {
+        return "Avançado";
+    }
+    if (lower.includes("básic") || lower.includes("basic") || lower.includes("iniciante") || lower.includes("a1") || lower.includes("a2") || lower.includes("leitura")) {
+        return "Básico";
+    }
+    return "Intermediário";
+}
+
+export function normalizeSocialUrl(rawUrl: unknown): string {
+    if (typeof rawUrl !== "string") return "";
+    return rawUrl
+        .trim()
+        .replace(/^https?:\/\//i, "")
+        .replace(/^www\./i, "")
+        .replace(/\/+$/, "");
+}
+
+export function normalizeEndDate(rawDate: unknown): string {
+    if (typeof rawDate !== "string") return "";
+    const trimmed = rawDate.trim();
+    const lower = trimmed.toLowerCase();
+    if (
+        lower === "atual" ||
+        lower === "atualmente" ||
+        lower === "presente" ||
+        lower === "present" ||
+        lower === "current" ||
+        lower === "em andamento" ||
+        lower === "até o momento"
+    ) {
+        return "";
+    }
+    return trimmed;
+}
+
+export function normalizeExtractedCV(raw: any): Omit<CVData, "style"> {
+    const asStr = (val: unknown, fallback = ""): string =>
+        typeof val === "string" ? val.trim() : val != null ? String(val).trim() : fallback;
+
+    const nowTag = Date.now();
+    const personalRaw = raw?.personal && typeof raw.personal === "object" ? raw.personal : {};
+    const personal = {
+        fullName: asStr(personalRaw.fullName),
+        title: asStr(personalRaw.title),
+        email: asStr(personalRaw.email),
+        phone: asStr(personalRaw.phone),
+        location: asStr(personalRaw.location),
+        linkedin: normalizeSocialUrl(personalRaw.linkedin),
+        github: normalizeSocialUrl(personalRaw.github)
+    };
+
+    const experience = Array.isArray(raw?.experience)
+        ? raw.experience
+            .filter((item: any) => item && (item.company || item.role || item.description))
+            .map((item: any, idx: number) => ({
+                id: `exp-${nowTag}-${idx + 1}`,
+                company: asStr(item?.company),
+                role: asStr(item?.role),
+                location: asStr(item?.location),
+                startDate: asStr(item?.startDate),
+                endDate: normalizeEndDate(item?.endDate),
+                description: asStr(item?.description)
+            }))
+        : [];
+
+    const education = Array.isArray(raw?.education)
+        ? raw.education
+            .filter((item: any) => item && (item.institution || item.degree))
+            .map((item: any, idx: number) => ({
+                id: `edu-${nowTag}-${idx + 1}`,
+                institution: asStr(item?.institution),
+                degree: asStr(item?.degree),
+                startDate: asStr(item?.startDate),
+                endDate: normalizeEndDate(item?.endDate),
+                description: asStr(item?.description)
+            }))
+        : [];
+
+    const projects = Array.isArray(raw?.projects)
+        ? raw.projects
+            .filter((item: any) => item && (item.name || item.description || item.role))
+            .map((item: any, idx: number) => ({
+                id: `proj-${nowTag}-${idx + 1}`,
+                name: asStr(item?.name),
+                role: asStr(item?.role),
+                link: normalizeSocialUrl(item?.link),
+                startDate: asStr(item?.startDate),
+                endDate: normalizeEndDate(item?.endDate),
+                description: asStr(item?.description)
+            }))
+        : [];
+
+    const certificates = Array.isArray(raw?.certificates)
+        ? raw.certificates
+            .filter((item: any) => item && item.name)
+            .map((item: any, idx: number) => ({
+                id: `cert-${nowTag}-${idx + 1}`,
+                name: asStr(item?.name),
+                organization: asStr(item?.organization),
+                date: asStr(item?.date)
+            }))
+        : [];
+
+    const languages = Array.isArray(raw?.languages)
+        ? raw.languages
+            .filter((item: any) => item && item.name)
+            .map((item: any, idx: number) => ({
+                id: `lang-${nowTag}-${idx + 1}`,
+                name: asStr(item?.name),
+                level: normalizeLanguageLevel(item?.level)
+            }))
+        : [];
+
+    const skills: string[] = Array.isArray(raw?.skills)
+        ? Array.from(
+            new Set(
+                raw.skills
+                    .map((s: unknown) => asStr(s))
+                    .filter((s: string) => s.length > 0)
+            )
+        )
+        : [];
+
+    const candidate = {
+        personal,
+        objective: asStr(raw?.objective),
+        experience,
+        education,
+        projects,
         certificates,
         skills,
         languages
@@ -205,6 +372,58 @@ export async function enrichCVWithOpenAICompatible(params: {
 
         const parsed = extractJsonFromText(rawContent);
         const validatedCV = normalizeEnrichedCV(parsed, cv);
+
+        return { data: validatedCV };
+    } catch (error: unknown) {
+        return handleOpenAICompatibleError(error);
+    }
+}
+
+export async function extractCVFromTextWithOpenAICompatible(params: {
+    rawResumeText: string;
+    apiKey: string;
+    model: string;
+    baseUrl: string;
+}): Promise<Result<GeminiQuotaExhaustedError | GeminiInvalidResponseError | ConfigurationError, Omit<CVData, "style">>> {
+    const { rawResumeText, apiKey, model, baseUrl } = params;
+
+    if (!baseUrl || !baseUrl.trim()) {
+        return { err: new ConfigurationError("A Base URL do provedor compatível com OpenAI não foi configurada.") };
+    }
+
+    if (!model || !model.trim()) {
+        return { err: new ConfigurationError("O modelo de IA não foi configurado.") };
+    }
+
+    const prompt = RESUME_EXTRACTION_PROMPT(rawResumeText);
+
+    try {
+        const response = await postChatCompletionsWithFallback(baseUrl, apiKey, {
+            model: model.trim(),
+            messages: [
+                {
+                    role: "system",
+                    content: "Você é um especialista sênior em extração estruturada de currículos e ATS. Responda EXCLUSIVAMENTE com um objeto JSON válido seguindo o schema solicitado, sem texto adicional e sem blocos markdown."
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            temperature: 0.1,
+            response_format: { type: "json_object" }
+        });
+
+        const rawContent = response.data?.choices?.[0]?.message?.content;
+
+        if (!rawContent || typeof rawContent !== "string") {
+            return {
+                err: new GeminiInvalidResponseError("O provedor de IA retornou uma resposta vazia ou em formato inesperado durante a extração do currículo.")
+            };
+        }
+
+        const parsed = extractJsonFromText(rawContent);
+        const validatedCV = normalizeExtractedCV(parsed);
 
         return { data: validatedCV };
     } catch (error: unknown) {

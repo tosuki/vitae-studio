@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { sampleData } from '../constants/sample-data.constants';
-import { CVData, PersonalData, ExperienceItem, EducationItem, CertificateItem, LanguageItem, StyleConfig } from '../types/cv.model';
+import { CVData, PersonalData, ExperienceItem, EducationItem, ProjectItem, CertificateItem, LanguageItem, StyleConfig } from '../types/cv.model';
 
 const emptyData: CVData = {
   personal: {
@@ -15,6 +15,7 @@ const emptyData: CVData = {
   objective: "",
   experience: [],
   education: [],
+  projects: [],
   certificates: [],
   skills: [],
   languages: [],
@@ -31,7 +32,11 @@ export function useCVState() {
     const saved = localStorage.getItem('cv_builder_data');
     if (saved) {
       try {
-        return JSON.parse(saved) as CVData;
+        const parsed = JSON.parse(saved) as CVData;
+        return {
+          ...parsed,
+          projects: Array.isArray(parsed.projects) ? parsed.projects : []
+        };
       } catch (e) {
         console.error("Erro ao carregar dados do LocalStorage", e);
       }
@@ -165,6 +170,53 @@ export function useCVState() {
     });
   };
 
+  // PROJETOS PESSOAIS
+  const handleAddProject = () => {
+    const newItem: ProjectItem = {
+      id: `proj-${Date.now()}`,
+      name: "",
+      role: "",
+      link: "",
+      startDate: "",
+      endDate: "",
+      description: ""
+    };
+    setCvData(prev => ({
+      ...prev,
+      projects: [...(prev.projects || []), newItem]
+    }));
+  };
+
+  const handleUpdateProject = (id: string, field: keyof ProjectItem, value: string) => {
+    setCvData(prev => ({
+      ...prev,
+      projects: (prev.projects || []).map(item =>
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
+  const handleRemoveProject = (id: string) => {
+    setCvData(prev => ({
+      ...prev,
+      projects: (prev.projects || []).filter(item => item.id !== id)
+    }));
+  };
+
+  const handleMoveProject = (index: number, direction: number) => {
+    const projectsList = cvData.projects || [];
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= projectsList.length) return;
+
+    setCvData(prev => {
+      const list = [...(prev.projects || [])];
+      const temp = list[index];
+      list[index] = list[nextIndex];
+      list[nextIndex] = temp;
+      return { ...prev, projects: list };
+    });
+  };
+
   // CERTIFICADOS
   const handleAddCertificate = () => {
     const newItem: CertificateItem = {
@@ -276,6 +328,10 @@ export function useCVState() {
     onUpdateEducation: handleUpdateEducation,
     onRemoveEducation: handleRemoveEducation,
     onMoveEducation: handleMoveEducation,
+    onAddProject: handleAddProject,
+    onUpdateProject: handleUpdateProject,
+    onRemoveProject: handleRemoveProject,
+    onMoveProject: handleMoveProject,
     onAddCertificate: handleAddCertificate,
     onUpdateCertificate: handleUpdateCertificate,
     onRemoveCertificate: handleRemoveCertificate,

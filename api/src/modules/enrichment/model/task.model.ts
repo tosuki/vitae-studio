@@ -7,8 +7,9 @@ export interface Task {
     status: TaskStatus;
     linkedinJobId: string;
     rawHtml: string | null;
-    cv: CVData
-    enrichedCV: Omit<CVData, "style"> | null
+    rawResumeText?: string | null;
+    cv: CVData | null;
+    enrichedCV: Omit<CVData, "style"> | null;
     errorMessage: string | null;
     createdAt: number;
     updatedAt: number;

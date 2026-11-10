@@ -27,6 +27,16 @@ export interface EducationItem {
   description: string;
 }
 
+export interface ProjectItem {
+  id: string;
+  name: string;
+  role: string;
+  link: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
 export interface CertificateItem {
   id: string;
   name: string;
@@ -54,6 +64,7 @@ export interface CVData {
   objective: string;
   experience: ExperienceItem[];
   education: EducationItem[];
+  projects: ProjectItem[];
   certificates: CertificateItem[];
   skills: string[];
   languages: LanguageItem[];

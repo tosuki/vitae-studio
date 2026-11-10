@@ -4,6 +4,7 @@ import CVEditor from './components/editor/cv-editor.component';
 import CVPreview from './components/preview/cv-preview.component';
 import Modal from './components/modal.component';
 import EnrichmentModal from './components/enrichment-modal.component';
+import ResumeUploadModal from './components/resume-upload-modal.component';
 import AtsModal from './components/ats-modal.component';
 import SettingsModal from './components/settings-modal.component';
 import { useCVState } from './hooks/cv-state.hook';
@@ -27,6 +28,7 @@ function AppContent() {
   const { sidebarWidth, isResizing, startResizing } = useSidebarResize(420);
   const { modalConfig, showAlert, showConfirm, closeModal } = useModalState();
   const [isEnrichmentModalOpen, setIsEnrichmentModalOpen] = useState(false);
+  const [isResumeUploadModalOpen, setIsResumeUploadModalOpen] = useState(false);
   const [isAtsModalOpen, setIsAtsModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isOnboardingMode, setIsOnboardingMode] = useState(false);
@@ -96,7 +98,10 @@ function AppContent() {
 
   const handleImportJson = (importedData: CVData) => {
     if (importedData && importedData.personal && Array.isArray(importedData.experience)) {
-      setCvData(importedData);
+      setCvData({
+        ...importedData,
+        projects: Array.isArray(importedData.projects) ? importedData.projects : []
+      });
     } else {
       showAlert(
         "Estrutura Inválida",
@@ -116,6 +121,7 @@ function AppContent() {
         onClear={handleClearAll}
         onExportJson={handleExportJson}
         onImportJson={handleImportJson}
+        onOpenResumeUpload={() => setIsResumeUploadModalOpen(true)}
         onPrint={handlePrint}
         onAlert={showAlert}
         onOpenEnrichment={() => setIsEnrichmentModalOpen(true)}
@@ -151,6 +157,15 @@ function AppContent() {
         onClose={() => setIsEnrichmentModalOpen(false)}
         cvData={cvData}
         onApplyEnrichment={setCvData}
+        isAIConfigured={isConfigured}
+        onOpenSettings={handleOpenSettingsManual}
+      />
+
+      <ResumeUploadModal
+        isOpen={isResumeUploadModalOpen}
+        onClose={() => setIsResumeUploadModalOpen(false)}
+        cvData={cvData}
+        onApplyExtractedCV={setCvData}
         isAIConfigured={isConfigured}
         onOpenSettings={handleOpenSettingsManual}
       />

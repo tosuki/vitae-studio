@@ -1,14 +1,15 @@
-import { useState, CSSProperties } from 'react';
+import { useState, useEffect, useRef, CSSProperties } from 'react';
 import FormSection from '../form-section.component';
 import StyleForm from './style-form.component';
 import PersonalForm from './personal-form.component';
 import ObjectiveForm from './objective-form.component';
 import ExperienceForm from './experience-form.component';
 import EducationForm from './education-form.component';
+import ProjectsForm from './projects-form.component';
 import CertificatesForm from './certificates-form.component';
 import SkillsForm from './skills-form.component';
 import LanguagesForm from './languages-form.component';
-import { CVData, PersonalData, ExperienceItem, EducationItem, CertificateItem, LanguageItem, StyleConfig } from '../../types/cv.model';
+import { CVData, PersonalData, ExperienceItem, EducationItem, ProjectItem, CertificateItem, LanguageItem, StyleConfig } from '../../types/cv.model';
 import './cv-editor.component.css';
 
 interface CVEditorProps {
@@ -25,6 +26,10 @@ interface CVEditorProps {
   onUpdateEducation: (id: string, field: keyof EducationItem, value: string) => void;
   onRemoveEducation: (id: string) => void;
   onMoveEducation: (index: number, direction: number) => void;
+  onAddProject: () => void;
+  onUpdateProject: (id: string, field: keyof ProjectItem, value: string) => void;
+  onRemoveProject: (id: string) => void;
+  onMoveProject: (index: number, direction: number) => void;
   onAddCertificate: () => void;
   onUpdateCertificate: (id: string, field: keyof CertificateItem, value: string) => void;
   onRemoveCertificate: (id: string) => void;
@@ -41,6 +46,7 @@ interface OpenSections {
   objective: boolean;
   experience: boolean;
   education: boolean;
+  projects: boolean;
   certificates: boolean;
   skills: boolean;
   languages: boolean;
@@ -61,6 +67,10 @@ export default function CVEditor({
   onUpdateEducation,
   onRemoveEducation,
   onMoveEducation,
+  onAddProject,
+  onUpdateProject,
+  onRemoveProject,
+  onMoveProject,
   onAddCertificate,
   onUpdateCertificate,
   onRemoveCertificate,
@@ -76,11 +86,34 @@ export default function CVEditor({
     objective: false,
     experience: false,
     education: false,
+    projects: false,
     certificates: false,
     skills: false,
     languages: false,
     style: true
   });
+
+  const previousSignatureRef = useRef<string>(
+    `${data.personal.fullName}|${data.experience.map(e => e.id).join(',')}|${(data.projects || []).map(p => p.id).join(',')}`
+  );
+
+  useEffect(() => {
+    const currentSignature = `${data.personal.fullName}|${data.experience.map(e => e.id).join(',')}|${(data.projects || []).map(p => p.id).join(',')}`;
+    if (previousSignatureRef.current !== currentSignature) {
+      previousSignatureRef.current = currentSignature;
+      setOpenSections(prev => ({
+        ...prev,
+        personal: true,
+        objective: prev.objective || Boolean(data.objective.trim()),
+        experience: prev.experience || data.experience.length > 0,
+        education: prev.education || data.education.length > 0,
+        projects: prev.projects || (data.projects && data.projects.length > 0),
+        certificates: prev.certificates || data.certificates.length > 0,
+        skills: prev.skills || data.skills.length > 0,
+        languages: prev.languages || data.languages.length > 0
+      }));
+    }
+  }, [data]);
 
   const toggleSection = (section: keyof OpenSections) => {
     setOpenSections(prev => ({
@@ -177,7 +210,28 @@ export default function CVEditor({
         />
       </FormSection>
 
-      {/* 6. CERTIFICADOS */}
+      {/* 6. PROJETOS PESSOAIS */}
+      <FormSection
+        title="Projetos Pessoais"
+        isOpen={openSections.projects}
+        onToggle={() => toggleSection('projects')}
+        icon={
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        }
+      >
+        <ProjectsForm 
+          projectsList={data.projects || []}
+          onAddProject={onAddProject}
+          onUpdateProject={onUpdateProject}
+          onRemoveProject={onRemoveProject}
+          onMoveProject={onMoveProject}
+        />
+      </FormSection>
+
+      {/* 7. CERTIFICADOS */}
       <FormSection
         title="Certificados"
         isOpen={openSections.certificates}
@@ -198,7 +252,7 @@ export default function CVEditor({
         />
       </FormSection>
 
-      {/* 7. COMPETÊNCIAS / SKILLS */}
+      {/* 8. COMPETÊNCIAS / SKILLS */}
       <FormSection
         title="Competências (Skills)"
         isOpen={openSections.skills}
@@ -216,7 +270,7 @@ export default function CVEditor({
         />
       </FormSection>
 
-      {/* 8. IDIOMAS */}
+      {/* 9. IDIOMAS */}
       <FormSection
         title="Idiomas"
         isOpen={openSections.languages}
