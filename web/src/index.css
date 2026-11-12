@@ -285,6 +285,7 @@ html, body, #root {
    ========================================================================== */
 @media print {
   .no-print,
+  .a4-page-indicator,
   nav,
   aside,
   button,
@@ -293,16 +294,24 @@ html, body, #root {
   textarea,
   .cv-editor,
   .navbar,
+  .resize-handle,
   .cv-preview-container::before {
     display: none !important;
   }
 
-  html, body {
+  html,
+  body,
+  #root,
+  .app-container,
+  .dashboard-workspace,
+  .cv-preview-wrapper {
     background-color: #ffffff !important;
     color: #000000 !important;
     height: auto !important;
+    min-height: 0 !important;
     width: 100% !important;
     overflow: visible !important;
+    display: block !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -315,15 +324,18 @@ html, body, #root {
     display: block !important;
     width: 100% !important;
     height: auto !important;
+    min-height: 0 !important;
   }
 
   .cv-preview-sheet {
     width: 100% !important;
     min-height: 0 !important;
+    height: auto !important;
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    transform: none !important;
     background: transparent !important;
     overflow: visible !important;
     display: flex !important;
@@ -336,16 +348,18 @@ html, body, #root {
 
   @page {
     size: A4;
-    margin: 15mm 15mm 15mm 15mm;
+    margin: 12mm 14mm;
   }
-  
-  .cv-section {
-    page-break-inside: avoid;
-    break-inside: avoid;
+
+  .cv-section-title {
+    page-break-after: avoid;
+    break-after: avoid;
   }
-  
+
   .cv-experience-item,
-  .cv-education-item {
+  .cv-education-item,
+  .cv-project-item,
+  .cv-certificate-item {
     page-break-inside: avoid;
     break-inside: avoid;
   }

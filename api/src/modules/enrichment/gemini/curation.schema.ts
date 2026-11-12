@@ -17,9 +17,13 @@ export const CurationResponseSchema = {
             description: "Requisitos ou palavras-chave importantes da vaga não identificados no perfil",
             items: { type: Type.STRING }
         },
+        tailoredTitle: {
+            type: Type.STRING,
+            description: "Headline profissional dinâmica alinhada à vaga e ao perfil real do candidato (ex: AI Engineer | Engenharia de Software & IA)"
+        },
         tailoredObjective: {
             type: Type.STRING,
-            description: "Resumo profissional/objetivo ultra direcionado para a vaga em 2 a 3 frases"
+            description: "Resumo profissional em 1ª pessoa (420 a 480 caracteres) conectando a bagagem do candidato à vaga e empresa"
         },
         experienceCuration: {
             type: Type.ARRAY,
@@ -127,6 +131,7 @@ export const CurationResponseSchema = {
         "matchScore",
         "matchedKeywords",
         "missingKeywords",
+        "tailoredTitle",
         "tailoredObjective",
         "experienceCuration",
         "projectCuration",

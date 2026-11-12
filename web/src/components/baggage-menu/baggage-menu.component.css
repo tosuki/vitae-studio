@@ -1,0 +1,428 @@
+/* BAGGAGE MENU (SELETOR MODERNO DE BAGAGENS) */
+.baggage-menu-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* TRIGGER BUTTON */
+.baggage-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: var(--db-card-bg);
+  border: 1px solid var(--db-border);
+  border-radius: 10px;
+  color: var(--db-text-primary);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm);
+  max-width: 260px;
+}
+
+.baggage-menu-trigger:hover {
+  background-color: var(--db-input-bg);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.baggage-menu-trigger.is-open {
+  border-color: var(--btn-primary-bg);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.baggage-menu-trigger.is-curated {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+}
+
+.trigger-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.trigger-text-block {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
+.trigger-score-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background-color: #10b981;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.trigger-count-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: var(--db-input-bg);
+  color: var(--db-text-secondary);
+  border: 1px solid var(--db-border);
+  padding: 0 5px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.trigger-chevron {
+  color: var(--db-text-secondary);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
+.trigger-chevron.rotate {
+  transform: rotate(180deg);
+}
+
+/* DROPDOWN PANEL */
+.baggage-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 380px;
+  max-width: 90vw;
+  background-color: var(--db-card-bg);
+  border: 1px solid var(--db-border);
+  border-radius: 14px;
+  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  z-index: 1000;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  animation: baggageMenuFadeDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes baggageMenuFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* DROPDOWN HEADER */
+.baggage-dropdown-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--db-border);
+  background: linear-gradient(to bottom, var(--db-card-bg), var(--db-input-bg));
+}
+
+.dropdown-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--db-text-primary);
+  letter-spacing: -0.2px;
+}
+
+.dropdown-subtitle {
+  margin: 2px 0 0;
+  font-size: 0.74rem;
+  color: var(--db-text-secondary);
+  line-height: 1.3;
+}
+
+.dropdown-total-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background-color: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+/* DROPDOWN BODY */
+.baggage-dropdown-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* CARDS */
+.baggage-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-color: var(--db-card-bg);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  text-align: left;
+}
+
+.baggage-card:hover {
+  background-color: var(--db-input-bg);
+  border-color: var(--db-border);
+  transform: translateX(2px);
+}
+
+.baggage-card.is-active {
+  background-color: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.baggage-card.master-card.is-active {
+  border-left: 3px solid #7c3aed;
+}
+
+.baggage-card.job-card.is-active {
+  border-left: 3px solid #10b981;
+}
+
+.baggage-card-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.card-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.master-badge {
+  background-color: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.job-badge {
+  background-color: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--db-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-desc {
+  font-size: 0.72rem;
+  color: var(--db-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.primary-tag {
+  background-color: rgba(124, 58, 237, 0.12);
+  color: #7c3aed;
+}
+
+.card-score-pill {
+  font-size: 0.66rem;
+  font-weight: 700;
+  background-color: #10b981;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.card-active-check {
+  color: var(--btn-primary-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.baggage-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.btn-card-remove {
+  background: transparent;
+  border: none;
+  color: var(--db-text-secondary);
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  opacity: 0.6;
+}
+
+.btn-card-remove:hover {
+  opacity: 1;
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  transform: scale(1.1);
+}
+
+/* SECTION DIVIDER */
+.baggage-section-divider {
+  padding: 8px 6px 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--db-text-secondary);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+/* JOBS LIST */
+.baggage-jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.baggage-jobs-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.baggage-jobs-list::-webkit-scrollbar-thumb {
+  background-color: var(--db-border);
+  border-radius: 4px;
+}
+
+/* EMPTY STATE */
+.baggage-empty-state {
+  padding: 16px 12px;
+  text-align: center;
+  background-color: var(--db-input-bg);
+  border: 1px dashed var(--db-border);
+  border-radius: 10px;
+}
+
+.empty-icon {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--db-text-primary);
+}
+
+.empty-desc {
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  color: var(--db-text-secondary);
+  line-height: 1.35;
+}
+
+/* DROPDOWN FOOTER */
+.baggage-dropdown-footer {
+  padding: 10px;
+  background: var(--db-input-bg);
+  border-top: 1px solid var(--db-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-dropdown-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.btn-dropdown-action.btn-curate {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #7c3aed;
+}
+
+.btn-dropdown-action.btn-curate:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%);
+  border-color: #7c3aed;
+  transform: translateY(-1px);
+}
+
+.btn-dropdown-action.btn-linkedin {
+  background-color: var(--db-card-bg);
+  border-color: var(--db-border);
+  color: #0a66c2;
+}
+
+.btn-dropdown-action.btn-linkedin:hover {
+  background-color: rgba(10, 102, 194, 0.08);
+  border-color: rgba(10, 102, 194, 0.4);
+  transform: translateY(-1px);
+}

@@ -86,6 +86,7 @@ export interface TargetedCuration {
   matchScore: number;
   matchedKeywords: string[];
   missingKeywords: string[];
+  tailoredTitle?: string;
   tailoredObjective: string;
   experience: Record<string, ItemCuration>;
   projects: Record<string, ItemCuration>;
@@ -105,6 +106,7 @@ export interface JobTarget {
 export interface CuratedJobResume {
   job: JobTarget;
   curation: TargetedCuration;
+  cv?: CVData;
 }
 
 export type ViewMode = 'master' | 'curated';

@@ -14,6 +14,7 @@ import {
   CuratedJobResume,
   ViewMode
 } from '../types/cv.model';
+import { pruneCurationToFitA4 } from '../utils/a4-density-pruner';
 
 const emptyData: CVData = {
   personal: {
@@ -49,13 +50,20 @@ export function deriveTargetedCV(
 ): CVData {
   if (!curation) return master;
 
+  // Aplica o algoritmo de poda progressiva determinística para garantia física de 1 página A4
+  const { curation: pruned, spacing } = pruneCurationToFitA4(master, curation);
+
   return {
     ...master,
-    objective: curation.tailoredObjective || master.objective,
+    personal: {
+      ...master.personal,
+      title: pruned.tailoredTitle || master.personal.title
+    },
+    objective: pruned.tailoredObjective || master.objective,
     experience: master.experience
-      .filter(exp => curation.experience[exp.id]?.included ?? true)
+      .filter(exp => pruned.experience[exp.id]?.included ?? true)
       .map(exp => {
-        const itemCur = curation.experience[exp.id];
+        const itemCur = pruned.experience[exp.id];
         const useTailored = itemCur?.useTailoredText ?? true;
         return {
           ...exp,
@@ -63,20 +71,23 @@ export function deriveTargetedCV(
         };
       }),
     projects: (master.projects || [])
-      .filter(proj => curation.projects[proj.id]?.included ?? true)
+      .filter(proj => pruned.projects?.[proj.id]?.included ?? true)
       .map(proj => {
-        const itemCur = curation.projects[proj.id];
+        const itemCur = pruned.projects?.[proj.id];
         const useTailored = itemCur?.useTailoredText ?? true;
         return {
           ...proj,
           description: useTailored && itemCur?.tailoredDescription ? itemCur.tailoredDescription : proj.description
         };
       }),
-    education: master.education.filter(edu => curation.education[edu.id]?.included ?? true),
-    certificates: master.certificates.filter(cert => curation.certificates[cert.id]?.included ?? true),
-    skills: curation.selectedSkills.length > 0 ? curation.selectedSkills : master.skills,
+    education: master.education.filter(edu => pruned.education[edu.id]?.included ?? true),
+    certificates: master.certificates.filter(cert => pruned.certificates[cert.id]?.included ?? true),
+    skills: pruned.selectedSkills.length > 0 ? pruned.selectedSkills : master.skills,
     languages: master.languages,
-    style: master.style
+    style: {
+      ...master.style,
+      spacing: spacing === 'compact' ? 'compact' : master.style?.spacing || 'normal'
+    }
   };
 }
 
@@ -134,23 +145,51 @@ export function useCVState() {
   // RENDERED CV (Projeção para o CVPreview e impressão)
   const cvData = useMemo(() => {
     if (activeMode === 'curated' && activeJob) {
-      return deriveTargetedCV(masterProfile, activeJob.curation);
+      const baseCv = activeJob.cv || deriveTargetedCV(masterProfile, activeJob.curation);
+      return {
+        ...baseCv,
+        experience: baseCv.experience.filter(exp => activeJob.curation?.experience?.[exp.id]?.included ?? true),
+        projects: (baseCv.projects || []).filter(proj => activeJob.curation?.projects?.[proj.id]?.included ?? true),
+        education: baseCv.education.filter(edu => activeJob.curation?.education?.[edu.id]?.included ?? true),
+        certificates: baseCv.certificates.filter(cert => activeJob.curation?.certificates?.[cert.id]?.included ?? true)
+      };
     }
     return masterProfile;
   }, [activeMode, activeJob, masterProfile]);
 
+  // MUTATION DISPATCHER (Isola edições da bagagem ativa da Bagagem Mestra)
+  const updateActiveCV = (updater: (current: CVData) => CVData) => {
+    if (activeMode === 'curated' && activeJobId) {
+      setSavedJobs(prev => prev.map(entry => {
+        if (entry.job.id !== activeJobId) return entry;
+        const currentCv = entry.cv || deriveTargetedCV(masterProfile, entry.curation);
+        return {
+          ...entry,
+          cv: updater(currentCv)
+        };
+      }));
+    } else {
+      setMasterProfile(prev => updater(prev));
+    }
+  };
+
   // Compatibility setter for import / JSON reset
   const setCvData = (updater: CVData | ((prev: CVData) => CVData)) => {
     if (typeof updater === 'function') {
-      setMasterProfile(prev => updater(prev));
+      updateActiveCV(prev => updater(prev));
     } else {
-      setMasterProfile(updater);
+      updateActiveCV(() => updater);
     }
   };
 
   // JOB CURATION MANAGEMENT
-  const addCuratedJob = (job: JobTarget, curation: TargetedCuration) => {
-    const newEntry: CuratedJobResume = { job, curation };
+  const addCuratedJob = (job: JobTarget, curation: TargetedCuration, customCv?: CVData) => {
+    const initialCv = customCv ? { ...customCv } : deriveTargetedCV(masterProfile, curation);
+    const newEntry: CuratedJobResume = {
+      job,
+      curation,
+      cv: initialCv
+    };
     setSavedJobs(prev => {
       const filtered = prev.filter(item => item.job.id !== job.id);
       return [newEntry, ...filtered];
@@ -228,9 +267,9 @@ export function useCVState() {
     }));
   };
 
-  // MASTER PROFILE MUTATION HANDLERS
+  // MUTATION HANDLERS (Operam na bagagem ativa sem alterar a Mestra quando em modo curated)
   const handleChangePersonal = (field: keyof PersonalData, value: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       personal: {
         ...prev.personal,
@@ -240,14 +279,14 @@ export function useCVState() {
   };
 
   const handleChangeObjective = (value: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       objective: value
     }));
   };
 
   const handleChangeStyle = (field: keyof StyleConfig, value: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       style: {
         ...prev.style,
@@ -266,14 +305,14 @@ export function useCVState() {
       endDate: "",
       description: ""
     };
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       experience: [...prev.experience, newItem]
     }));
   };
 
   const handleUpdateExperience = (id: string, field: keyof ExperienceItem, value: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       experience: prev.experience.map(item => 
         item.id === id ? { ...item, [field]: value } : item
@@ -282,19 +321,21 @@ export function useCVState() {
   };
 
   const handleRemoveExperience = (id: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       experience: prev.experience.filter(item => item.id !== id)
     }));
   };
 
   const handleMoveExperience = (index: number, direction: number) => {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= masterProfile.experience.length) return;
-    const items = [...masterProfile.experience];
-    const [moved] = items.splice(index, 1);
-    items.splice(newIndex, 0, moved);
-    setMasterProfile(prev => ({ ...prev, experience: items }));
+    updateActiveCV(prev => {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= prev.experience.length) return prev;
+      const items = [...prev.experience];
+      const [moved] = items.splice(index, 1);
+      items.splice(newIndex, 0, moved);
+      return { ...prev, experience: items };
+    });
   };
 
   const handleAddEducation = () => {
@@ -306,14 +347,14 @@ export function useCVState() {
       endDate: "",
       description: ""
     };
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       education: [...prev.education, newItem]
     }));
   };
 
   const handleUpdateEducation = (id: string, field: keyof EducationItem, value: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       education: prev.education.map(item => 
         item.id === id ? { ...item, [field]: value } : item
@@ -322,19 +363,21 @@ export function useCVState() {
   };
 
   const handleRemoveEducation = (id: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       education: prev.education.filter(item => item.id !== id)
     }));
   };
 
   const handleMoveEducation = (index: number, direction: number) => {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= masterProfile.education.length) return;
-    const items = [...masterProfile.education];
-    const [moved] = items.splice(index, 1);
-    items.splice(newIndex, 0, moved);
-    setMasterProfile(prev => ({ ...prev, education: items }));
+    updateActiveCV(prev => {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= prev.education.length) return prev;
+      const items = [...prev.education];
+      const [moved] = items.splice(index, 1);
+      items.splice(newIndex, 0, moved);
+      return { ...prev, education: items };
+    });
   };
 
   const handleAddProject = () => {
@@ -347,14 +390,14 @@ export function useCVState() {
       endDate: "",
       description: ""
     };
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       projects: [...(prev.projects || []), newItem]
     }));
   };
 
   const handleUpdateProject = (id: string, field: keyof ProjectItem, value: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       projects: (prev.projects || []).map(item => 
         item.id === id ? { ...item, [field]: value } : item
@@ -363,20 +406,22 @@ export function useCVState() {
   };
 
   const handleRemoveProject = (id: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       projects: (prev.projects || []).filter(item => item.id !== id)
     }));
   };
 
   const handleMoveProject = (index: number, direction: number) => {
-    const currentProjects = masterProfile.projects || [];
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= currentProjects.length) return;
-    const items = [...currentProjects];
-    const [moved] = items.splice(index, 1);
-    items.splice(newIndex, 0, moved);
-    setMasterProfile(prev => ({ ...prev, projects: items }));
+    updateActiveCV(prev => {
+      const currentProjects = prev.projects || [];
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= currentProjects.length) return prev;
+      const items = [...currentProjects];
+      const [moved] = items.splice(index, 1);
+      items.splice(newIndex, 0, moved);
+      return { ...prev, projects: items };
+    });
   };
 
   const handleAddCertificate = () => {
@@ -386,14 +431,14 @@ export function useCVState() {
       organization: "",
       date: ""
     };
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       certificates: [...prev.certificates, newItem]
     }));
   };
 
   const handleUpdateCertificate = (id: string, field: keyof CertificateItem, value: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       certificates: prev.certificates.map(item => 
         item.id === id ? { ...item, [field]: value } : item
@@ -402,33 +447,37 @@ export function useCVState() {
   };
 
   const handleRemoveCertificate = (id: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       certificates: prev.certificates.filter(item => item.id !== id)
     }));
   };
 
   const handleMoveCertificate = (index: number, direction: number) => {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= masterProfile.certificates.length) return;
-    const items = [...masterProfile.certificates];
-    const [moved] = items.splice(index, 1);
-    items.splice(newIndex, 0, moved);
-    setMasterProfile(prev => ({ ...prev, certificates: items }));
+    updateActiveCV(prev => {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= prev.certificates.length) return prev;
+      const items = [...prev.certificates];
+      const [moved] = items.splice(index, 1);
+      items.splice(newIndex, 0, moved);
+      return { ...prev, certificates: items };
+    });
   };
 
   const handleAddSkill = (skill: string) => {
     const trimmed = skill.trim();
-    if (trimmed && !masterProfile.skills.includes(trimmed)) {
-      setMasterProfile(prev => ({
+    if (!trimmed) return;
+    updateActiveCV(prev => {
+      if (prev.skills.includes(trimmed)) return prev;
+      return {
         ...prev,
         skills: [...prev.skills, trimmed]
-      }));
-    }
+      };
+    });
   };
 
   const handleRemoveSkill = (skillToRemove: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       skills: prev.skills.filter(s => s !== skillToRemove)
     }));
@@ -440,14 +489,14 @@ export function useCVState() {
       name: "",
       level: "Intermediário"
     };
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       languages: [...prev.languages, newItem]
     }));
   };
 
   const handleUpdateLanguage = (id: string, field: keyof LanguageItem, value: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       languages: prev.languages.map(item => 
         item.id === id ? { ...item, [field]: value } : item
@@ -456,18 +505,26 @@ export function useCVState() {
   };
 
   const handleRemoveLanguage = (id: string) => {
-    setMasterProfile(prev => ({
+    updateActiveCV(prev => ({
       ...prev,
       languages: prev.languages.filter(item => item.id !== id)
     }));
   };
 
   const resetToEmpty = () => {
-    setMasterProfile(emptyData);
+    if (activeMode === 'curated' && activeJobId) {
+      updateActiveCV(() => ({ ...emptyData }));
+    } else {
+      setMasterProfile(emptyData);
+    }
   };
 
   const loadSample = () => {
-    setMasterProfile(sampleData);
+    if (activeMode === 'curated' && activeJobId) {
+      updateActiveCV(() => ({ ...sampleData }));
+    } else {
+      setMasterProfile(sampleData);
+    }
   };
 
   return {

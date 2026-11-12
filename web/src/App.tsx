@@ -13,7 +13,7 @@ import { useSidebarResize } from './hooks/sidebar-resize.hook';
 import { useModalState } from './hooks/modal-state.hook';
 import { EnrichmentProvider } from './hooks/enrichment.hook';
 import { useSettings } from './hooks/settings.hook';
-import { CVData } from './types/cv.model';
+import { CVData, JobTarget, TargetedCuration } from './types/cv.model';
 
 const ONBOARDING_DISMISSED_KEY = 'vitae_studio_onboarding_dismissed';
 
@@ -127,6 +127,48 @@ function AppContent() {
     window.print();
   };
 
+  const handleApplyLinkedinEnrichment = (
+    enrichedCv: CVData,
+    jobInfo?: { jobId: string; roleTitle?: string; company?: string }
+  ) => {
+    const roleTitle = enrichedCv.personal.title?.trim() || (jobInfo?.jobId ? `Vaga LinkedIn #${jobInfo.jobId}` : "Vaga LinkedIn");
+    const newJob: JobTarget = {
+      id: `job-linkedin-${Date.now()}`,
+      roleTitle,
+      company: jobInfo?.company || "LinkedIn",
+      jobDescription: `Currículo adaptado via LinkedIn (ID: ${jobInfo?.jobId || 'N/A'})`,
+      createdAt: Date.now()
+    };
+
+    const newCuration: TargetedCuration = {
+      jobTitle: roleTitle,
+      company: jobInfo?.company || "LinkedIn",
+      matchScore: 92,
+      matchedKeywords: (enrichedCv.skills || []).slice(0, 8),
+      missingKeywords: [],
+      tailoredObjective: enrichedCv.objective,
+      experience: Object.fromEntries(
+        (enrichedCv.experience || []).map(e => [e.id, { included: true, tailoredDescription: e.description, useTailoredText: true }])
+      ),
+      projects: Object.fromEntries(
+        (enrichedCv.projects || []).map(p => [p.id, { included: true, tailoredDescription: p.description, useTailoredText: true }])
+      ),
+      education: Object.fromEntries(
+        (enrichedCv.education || []).map(ed => [ed.id, { included: true }])
+      ),
+      certificates: Object.fromEntries(
+        (enrichedCv.certificates || []).map(c => [c.id, { included: true }])
+      ),
+      selectedSkills: enrichedCv.skills || []
+    };
+
+    addCuratedJob(newJob, newCuration, enrichedCv);
+    showAlert(
+      "Nova Bagagem Criada com Sucesso!",
+      `A nova bagagem "${roleTitle}" foi gerada a partir da vaga do LinkedIn e selecionada para edição. Sua Bagagem Mestra permaneceu 100% protegida e intacta.`
+    );
+  };
+
   return (
     <div className="app-container">
       <Navbar
@@ -152,7 +194,7 @@ function AppContent() {
 
       <div className={`dashboard-workspace ${isResizing ? 'is-resizing' : ''}`}>
         <CVEditor
-          data={cvData}
+          data={activeMode === 'curated' && activeJob?.cv ? activeJob.cv : cvData}
           style={{ width: `${sidebarWidth}px` }}
           activeMode={activeMode}
           activeJob={activeJob}
@@ -191,7 +233,7 @@ function AppContent() {
         isOpen={isEnrichmentModalOpen}
         onClose={() => setIsEnrichmentModalOpen(false)}
         cvData={masterProfile}
-        onApplyEnrichment={setCvData}
+        onApplyEnrichment={handleApplyLinkedinEnrichment}
         isAIConfigured={isConfigured}
         onOpenSettings={handleOpenSettingsManual}
       />

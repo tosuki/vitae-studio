@@ -221,6 +221,56 @@
   gap: 8px;
 }
 
+.curation-safety-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.master-editor-banner {
+  background-color: var(--db-card-bg);
+  border: 1px solid var(--db-border);
+  border-left: 3px solid #7c3aed;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.master-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.master-emoji {
+  font-size: 1.1rem;
+}
+
+.master-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.master-banner-text strong {
+  font-size: 0.82rem;
+  color: var(--db-text-primary);
+}
+
+.master-banner-text small {
+  font-size: 0.72rem;
+  color: var(--db-text-secondary);
+}
+
 .curation-banner-role {
   font-weight: 700;
   font-size: 0.95rem;

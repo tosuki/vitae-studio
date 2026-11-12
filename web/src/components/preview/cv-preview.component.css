@@ -19,16 +19,16 @@
   box-sizing: border-box;
   background-color: #ffffff;
   color: #1e293b;
-  width: 793px; /* A4 width at 96 DPI */
-  min-height: 1120px; /* A4 height at 96 DPI */
-  padding: calc(30px * var(--preview-spacing-multiplier)) calc(40px * var(--preview-spacing-multiplier));
+  width: 210mm; /* Exact physical A4 width */
+  min-height: 297mm; /* Exact physical A4 height */
+  padding: 12mm 14mm; /* Identical 1:1 to @page print margins */
   box-shadow: var(--sheet-shadow);
   display: flex;
   flex-direction: column;
-  gap: calc(16px * var(--preview-spacing-multiplier));
+  gap: calc(15px * var(--preview-spacing-multiplier));
   border: 1px solid #cbd5e1;
   text-align: left;
-  line-height: 1.45;
+  line-height: var(--preview-line-height, 1.42);
 }
 
 /* CV FONTS */
@@ -209,12 +209,12 @@
   display: list-item;
   list-style-type: square;
   margin-left: 14px;
-  line-height: 1.4;
+  line-height: var(--preview-line-height, 1.38);
 }
 
 .cv-text-paragraph {
   margin: 0;
-  line-height: 1.45;
+  line-height: var(--preview-line-height, 1.42);
 }
 
 .cv-item-description-text {

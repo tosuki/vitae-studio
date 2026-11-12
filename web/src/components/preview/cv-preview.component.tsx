@@ -12,21 +12,21 @@ interface CVPreviewProps {
   data: CVData;
 }
 
-const A4_STANDARD_HEIGHT_PX = 1120; // 297mm at 96 DPI
+const A4_SAFE_HEIGHT_PX = 1100; // 297mm = 1122px a 96 DPI (deixa ~5.5mm de margem de segurança contra spillover)
 
 export default function CVPreview({ data }: CVPreviewProps) {
   const { personal, objective, experience, education, projects, certificates, skills, languages, style } = data;
   const containerRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const [sheetHeight, setSheetHeight] = useState(A4_STANDARD_HEIGHT_PX);
+  const [sheetHeight, setSheetHeight] = useState(A4_SAFE_HEIGHT_PX);
 
   useEffect(() => {
     const updateScaleAndHeight = () => {
       if (!containerRef.current) return;
       const containerWidth = containerRef.current.clientWidth - 32;
-      if (containerWidth < 793) {
-        setScale(containerWidth / 793);
+      if (containerWidth < 794) {
+        setScale(containerWidth / 794);
       } else {
         setScale(1);
       }
@@ -66,23 +66,25 @@ export default function CVPreview({ data }: CVPreviewProps) {
   interface PreviewStyle extends CSSProperties {
     '--preview-accent'?: string;
     '--preview-spacing-multiplier'?: string;
+    '--preview-line-height'?: string;
   }
 
   const previewStyle: PreviewStyle = {
     '--preview-accent': style.accentColor,
-    '--preview-spacing-multiplier': style.spacing === 'compact' ? '0.7' : style.spacing === 'relaxed' ? '1.3' : '1.0',
+    '--preview-spacing-multiplier': style.spacing === 'compact' ? '0.72' : style.spacing === 'relaxed' ? '1.3' : '1.0',
+    '--preview-line-height': style.spacing === 'compact' ? '1.33' : style.spacing === 'relaxed' ? '1.5' : '1.42',
   };
 
-  const isOverflowing = sheetHeight > A4_STANDARD_HEIGHT_PX + 25;
+  const isOverflowing = sheetHeight > A4_SAFE_HEIGHT_PX;
 
   return (
-    <main className="cv-preview-container no-print" ref={containerRef}>
+    <main className="cv-preview-container" ref={containerRef}>
       <div className="cv-preview-wrapper">
-        <div className={`a4-page-indicator ${isOverflowing ? 'overflow' : 'perfect'}`}>
+        <div className={`a4-page-indicator no-print ${isOverflowing ? 'overflow' : 'perfect'}`}>
           {isOverflowing ? (
-            <span>⚠️ Atenção: Conteúdo ultrapassou 1 folha A4 ({sheetHeight}px / {A4_STANDARD_HEIGHT_PX}px). Desative algum item para manter o padrão de 1 página.</span>
+            <span>⚠️ Atenção: Conteúdo ultrapassou 1 folha A4 ({sheetHeight}px / {A4_SAFE_HEIGHT_PX}px). Desative algum item para manter o padrão de 1 página.</span>
           ) : (
-            <span>✓ Encaixe Perfeito: 1 Folha A4 ({sheetHeight}px / {A4_STANDARD_HEIGHT_PX}px)</span>
+            <span>✓ Encaixe Perfeito: 1 Folha A4 ({sheetHeight}px / {A4_SAFE_HEIGHT_PX}px)</span>
           )}
         </div>
 
@@ -93,7 +95,7 @@ export default function CVPreview({ data }: CVPreviewProps) {
             ...previewStyle,
             transform: `scale(${scale})`,
             transformOrigin: 'top center',
-            marginBottom: `calc(1120px * (1 - ${scale}) * -1)`
+            marginBottom: `calc(1122px * (1 - ${scale}) * -1)`
           }}
           id="cv-print-area"
         >

@@ -1,5 +1,6 @@
 import { useRef, ChangeEvent } from 'react';
 import { CVData, CuratedJobResume, ViewMode } from '../types/cv.model';
+import BaggageMenu from './baggage-menu/baggage-menu.component';
 import './navbar.component.css';
 
 interface NavbarProps {
@@ -84,48 +85,16 @@ export default function Navbar({
       </div>
 
       {/* CONTEXT SWITCHER: MASTER PROFILE VS CURATED JOB RESUMES */}
-      <div className="navbar-mode-switcher">
-        <button
-          type="button"
-          className={`mode-pill ${activeMode === 'master' ? 'active' : ''}`}
-          onClick={onSelectMaster}
-          title="Ver e editar todo o histórico acumulado (sem limite de páginas)"
-        >
-          <span>💼 Minha Bagagem</span>
-        </button>
-
-        {savedJobs.map(entry => (
-          <div
-            key={entry.job.id}
-            className={`mode-pill ${activeMode === 'curated' && activeJobId === entry.job.id ? 'active' : ''}`}
-            onClick={() => onSelectJob(entry.job.id)}
-            title={`Ver currículo de 1 página calibrado para ${entry.job.roleTitle}`}
-          >
-            <span>🎯 {entry.job.roleTitle}</span>
-            <span className="mode-pill-score">{entry.curation.matchScore}%</span>
-            <button
-              type="button"
-              className="mode-pill-remove"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemoveJob(entry.job.id);
-              }}
-              title="Excluir currículo desta vaga"
-            >
-              &times;
-            </button>
-          </div>
-        ))}
-
-        <button
-          type="button"
-          className="btn-new-job"
-          onClick={onOpenCurateJob}
-          title="Curar experiências e gerar um novo currículo de 1 página A4 com IA"
-        >
-          <span>+ Otimizar para Vaga (1 pág A4)</span>
-        </button>
-      </div>
+      <BaggageMenu
+        activeMode={activeMode}
+        savedJobs={savedJobs}
+        activeJobId={activeJobId}
+        onSelectMaster={onSelectMaster}
+        onSelectJob={onSelectJob}
+        onRemoveJob={onRemoveJob}
+        onOpenCurateJob={onOpenCurateJob}
+        onOpenLinkedinEnrichment={onOpenEnrichment}
+      />
 
       <div className="navbar-actions">
         <div className="action-group">

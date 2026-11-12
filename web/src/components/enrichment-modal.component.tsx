@@ -7,7 +7,7 @@ interface EnrichmentModalProps {
     isOpen: boolean
     onClose: () => void
     cvData: CVData
-    onApplyEnrichment: (enrichedCv: CVData) => void
+    onApplyEnrichment: (enrichedCv: CVData, jobInfo?: { jobId: string; roleTitle?: string; company?: string }) => void
     isAIConfigured?: boolean
     onOpenSettings?: () => void
 }
@@ -81,7 +81,11 @@ export default function EnrichmentModal({
                 ...enrichedCV,
                 style: cvData.style
             }
-            onApplyEnrichment(completeCv)
+            onApplyEnrichment(completeCv, {
+                jobId: linkedinJobId.trim(),
+                roleTitle: enrichedCV.personal.title,
+                company: "LinkedIn"
+            })
             onClose()
         }
     }
@@ -188,7 +192,7 @@ export default function EnrichmentModal({
                                         <polyline points="20 6 9 17 4 12"></polyline>
                                     </svg>
                                     <div>
-                                        <strong>Currículo pronto!</strong> A inteligência artificial terminou de adaptar as experiências e habilidades para a vaga solicitada. Clique abaixo para aplicar no editor.
+                                        <strong>Currículo pronto!</strong> A IA adaptou as experiências e habilidades para a vaga do LinkedIn. Uma <strong>nova bagagem</strong> será criada para esta vaga, mantendo a sua <strong>Bagagem Mestra intacta</strong>.
                                     </div>
                                 </div>
                             )}
@@ -227,7 +231,7 @@ export default function EnrichmentModal({
                                 Descartar
                             </button>
                             <button type="button" className="btn btn-primary" onClick={handleApply}>
-                                Aplicar Currículo Adaptado
+                                💼 Criar Nova Bagagem da Vaga
                             </button>
                         </>
                     )}

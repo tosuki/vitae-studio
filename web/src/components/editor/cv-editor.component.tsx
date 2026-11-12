@@ -126,7 +126,7 @@ export default function CVEditor({
   return (
     <aside className="cv-editor no-print" style={style}>
       {/* CURATION MODE BANNER */}
-      {isCurated && activeJob && (
+      {isCurated && activeJob ? (
         <div className="curation-editor-banner">
           <div className="curation-banner-top">
             <div className="curation-banner-role">
@@ -138,6 +138,12 @@ export default function CVEditor({
               <span className="curation-a4-tag">1 Página A4</span>
             </div>
           </div>
+          <div className="curation-safety-tag">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>Edição isolada: as alterações nesta bagagem não alteram a sua Bagagem Mestra.</span>
+          </div>
           <p className="curation-banner-helper">
             {activeJob.curation.tailoredObjective}
           </p>
@@ -148,6 +154,16 @@ export default function CVEditor({
               ))}
             </div>
           )}
+        </div>
+      ) : (
+        <div className="master-editor-banner">
+          <div className="master-banner-left">
+            <span className="master-emoji">💼</span>
+            <div className="master-banner-text">
+              <strong>Bagagem Mestra Ativa</strong>
+              <small>Seu histórico completo. Todas as novas vagas utilizam esta base.</small>
+            </div>
+          </div>
         </div>
       )}
 

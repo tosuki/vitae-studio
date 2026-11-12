@@ -86,6 +86,7 @@ export const curationResultSchema = z.object({
     matchScore: z.number(),
     matchedKeywords: z.array(z.string()),
     missingKeywords: z.array(z.string()),
+    tailoredTitle: z.string().optional(),
     tailoredObjective: z.string(),
     experience: z.record(z.string(), itemCurationSchema),
     projects: z.record(z.string(), itemCurationSchema),

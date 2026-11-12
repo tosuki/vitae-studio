@@ -94,7 +94,7 @@ export class QueueManager {
         });
 
         this.geminiWorker.on("failed", (job, err) => {
-            logger.error(err, `Gemini Worker failed on job ${job?.id}`);
+            logger.error(err, `AI Worker failed on job ${job?.id}`);
         });
     }
 
