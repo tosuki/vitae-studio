@@ -48,6 +48,17 @@ const sampleCV: CVData = {
             description: "Bacharelado"
         }
     ],
+    projects: [
+        {
+            id: "proj-1",
+            name: "Vitae Studio",
+            role: "Criador / Full Stack",
+            link: "github.com/mariadev/vitae-studio",
+            startDate: "2024",
+            endDate: "",
+            description: "Construtor de currículos inteligente com IA."
+        }
+    ],
     certificates: [
         {
             id: "cert-1",
@@ -184,6 +195,7 @@ describe("Settings & Multi-Provider AI (Gemini, OpenAI, OpenAPI / 9router)", () 
                             }
                         ],
                         education: sampleCV.education,
+                        projects: sampleCV.projects,
                         certificates: sampleCV.certificates,
                         skills: ["TypeScript", "Node.js", "Fastify", "Redis"],
                         languages: sampleCV.languages

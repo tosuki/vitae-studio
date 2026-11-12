@@ -30,6 +30,16 @@ const educationItemSchema = z.object({
     description: z.string()
 });
 
+const projectItemSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    role: z.string(),
+    link: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+    description: z.string()
+});
+
 const certificateItemSchema = z.object({
     id: z.string(),
     name: z.string(),
@@ -55,6 +65,7 @@ export const cvSchema = z.object({
     objective: z.string(),
     experience: z.array(experienceItemSchema),
     education: z.array(educationItemSchema),
+    projects: z.array(projectItemSchema),
     certificates: z.array(certificateItemSchema),
     skills: z.array(z.string()),
     languages: z.array(languageItemSchema),
@@ -62,6 +73,27 @@ export const cvSchema = z.object({
 });
 
 export const enrichedCVSchema = cvSchema.omit({ style: true });
+
+export const itemCurationSchema = z.object({
+    included: z.boolean(),
+    relevanceScore: z.number().optional(),
+    tailoredDescription: z.string().optional()
+});
+
+export const curationResultSchema = z.object({
+    jobTitle: z.string(),
+    company: z.string().optional(),
+    matchScore: z.number(),
+    matchedKeywords: z.array(z.string()),
+    missingKeywords: z.array(z.string()),
+    tailoredTitle: z.string().optional(),
+    tailoredObjective: z.string(),
+    experience: z.record(z.string(), itemCurationSchema),
+    projects: z.record(z.string(), itemCurationSchema),
+    education: z.record(z.string(), itemCurationSchema),
+    certificates: z.record(z.string(), itemCurationSchema),
+    selectedSkills: z.array(z.string())
+});
 
 export const createTaskSchema: FastifySchema = {
     body: z.object({
@@ -74,6 +106,29 @@ export const createTaskSchema: FastifySchema = {
             status: z.string(),
             linkedinJobId: z.string(),
             enrichedCV: enrichedCVSchema.nullable(),
+            curationResult: curationResultSchema.nullable().optional(),
+            errorMessage: z.string().nullable(),
+            updatedAt: z.number()
+        })
+    }
+}
+
+export const curateTaskSchema: FastifySchema = {
+    body: z.object({
+        job: z.object({
+            roleTitle: z.string().min(2, "Cargo alvo é obrigatório"),
+            jobDescription: z.string().min(10, "Descrição da vaga deve ter no mínimo 10 caracteres"),
+            company: z.string().optional()
+        }),
+        cv: cvSchema
+    }),
+    response: {
+        201: z.object({
+            id: z.string(),
+            status: z.string(),
+            linkedinJobId: z.string(),
+            enrichedCV: enrichedCVSchema.nullable(),
+            curationResult: curationResultSchema.nullable().optional(),
             errorMessage: z.string().nullable(),
             updatedAt: z.number()
         })
@@ -90,11 +145,31 @@ export const getTaskSchema: FastifySchema = {
             status: z.string(),
             linkedinJobId: z.string(),
             enrichedCV: enrichedCVSchema.nullable(),
+            curationResult: curationResultSchema.nullable().optional(),
             errorMessage: z.string().nullable(),
             updatedAt: z.number()
         }),
         404: z.object({
             error: z.string()
         })
+    }
+}
+
+export const parseResumeTaskSchema: FastifySchema = {
+    response: {
+        201: z.object({
+            id: z.string(),
+            status: z.string(),
+            linkedinJobId: z.string(),
+            enrichedCV: enrichedCVSchema.nullable(),
+            curationResult: curationResultSchema.nullable().optional(),
+            errorMessage: z.string().nullable(),
+            updatedAt: z.number()
+        }),
+        400: z.object({ error: z.string() }),
+        413: z.object({ error: z.string() }),
+        415: z.object({ error: z.string() }),
+        422: z.object({ error: z.string() }),
+        500: z.object({ error: z.string() })
     }
 }

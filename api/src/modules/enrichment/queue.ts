@@ -4,6 +4,7 @@ import { geminiWorkerHandler } from "./gemini/gemini.worker";
 import env from "../../env";
 import { logger } from "../../util/logger";
 import { CVData } from "../common/model/cv.model";
+import { JobCurationInput } from "./gemini/curation.prompt";
 
 export class QueueManager {
     private linkedinQueue: Queue;
@@ -52,6 +53,14 @@ export class QueueManager {
         await this.geminiQueue.add("extract-gemini", { taskId, rawHtml, cv });
     }
 
+    public async addResumeParseJob(taskId: string, rawResumeText: string) {
+        await this.geminiQueue.add("parse-resume-gemini", { taskId, rawResumeText });
+    }
+
+    public async addCurationJob(taskId: string, jobCuration: JobCurationInput, cv: CVData) {
+        await this.geminiQueue.add("curate-job-gemini", { taskId, jobCuration, cv });
+    }
+
     public startWorkers() {
         const connection = {
             host: env.REDIS_HOST,
@@ -85,7 +94,7 @@ export class QueueManager {
         });
 
         this.geminiWorker.on("failed", (job, err) => {
-            logger.error(err, `Gemini Worker failed on job ${job?.id}`);
+            logger.error(err, `AI Worker failed on job ${job?.id}`);
         });
     }
 

@@ -1,5 +1,5 @@
 import axios, { isAxiosError } from "axios"
-import { CVData } from "../types/cv.model"
+import { CVData, TargetedCuration } from "../types/cv.model"
 
 export const CV_ENRICHMENT_API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"
 
@@ -15,6 +15,7 @@ export interface TaskResponse {
     status: TaskStatus;
     linkedinJobId: string;
     enrichedCV: Omit<CVData, "style"> | null;
+    curationResult?: TargetedCuration | null;
     errorMessage: string | null;
     updatedAt: number;
 }
@@ -31,6 +32,39 @@ export async function createEnrichmentTask(linkedinJobId: string, cv: CVData): P
         const response = await client.post<TaskResponse>('/tasks', {
             linkedinJobId: linkedinJobId,
             cv: cv,
+        })
+
+        return { data: response.data }
+    } catch (error: unknown) {
+        return { err: handleAxiosError(error) }
+    }
+}
+
+export async function createCurateTask(
+    job: { roleTitle: string; jobDescription: string; company?: string },
+    cv: CVData
+): Promise<Result<EnrichmentError, TaskResponse>> {
+    try {
+        const response = await client.post<TaskResponse>('/tasks/curate', {
+            job,
+            cv
+        })
+        return { data: response.data }
+    } catch (error: unknown) {
+        return { err: handleAxiosError(error) }
+    }
+}
+
+export async function createResumeParseTask(file: File): Promise<Result<EnrichmentError, TaskResponse>> {
+    try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await client.post<TaskResponse>('/tasks/parse-resume', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
+            timeout: 30000
         })
 
         return { data: response.data }
@@ -61,10 +95,10 @@ function handleAxiosError(error: unknown): EnrichmentError {
         const responseData = error.response.data as any
         const msg = responseData?.message || responseData?.error || error.message
 
-        if (status === 400) {
+        if (status === 400 || status === 413 || status === 415 || status === 422) {
             return { 
                 code: "bad-request", 
-                message: msg || "Dados de entrada inválidos. Verifique as informações enviadas." 
+                message: msg || "Arquivo inválido ou não pôde ser processado. Verifique o formato enviado." 
             }
         }
 

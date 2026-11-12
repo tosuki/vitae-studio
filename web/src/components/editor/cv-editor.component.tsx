@@ -1,14 +1,26 @@
-import { useState, CSSProperties } from 'react';
+import { useState, useEffect, useRef, CSSProperties } from 'react';
 import FormSection from '../form-section.component';
 import StyleForm from './style-form.component';
 import PersonalForm from './personal-form.component';
 import ObjectiveForm from './objective-form.component';
 import ExperienceForm from './experience-form.component';
 import EducationForm from './education-form.component';
+import ProjectsForm from './projects-form.component';
 import CertificatesForm from './certificates-form.component';
 import SkillsForm from './skills-form.component';
 import LanguagesForm from './languages-form.component';
-import { CVData, PersonalData, ExperienceItem, EducationItem, CertificateItem, LanguageItem, StyleConfig } from '../../types/cv.model';
+import {
+  CVData,
+  PersonalData,
+  ExperienceItem,
+  EducationItem,
+  ProjectItem,
+  CertificateItem,
+  LanguageItem,
+  StyleConfig,
+  CuratedJobResume,
+  ViewMode
+} from '../../types/cv.model';
 import './cv-editor.component.css';
 
 interface CVEditorProps {
@@ -25,6 +37,10 @@ interface CVEditorProps {
   onUpdateEducation: (id: string, field: keyof EducationItem, value: string) => void;
   onRemoveEducation: (id: string) => void;
   onMoveEducation: (index: number, direction: number) => void;
+  onAddProject: () => void;
+  onUpdateProject: (id: string, field: keyof ProjectItem, value: string) => void;
+  onRemoveProject: (id: string) => void;
+  onMoveProject: (index: number, direction: number) => void;
   onAddCertificate: () => void;
   onUpdateCertificate: (id: string, field: keyof CertificateItem, value: string) => void;
   onRemoveCertificate: (id: string) => void;
@@ -34,6 +50,12 @@ interface CVEditorProps {
   onAddLanguage: () => void;
   onUpdateLanguage: (id: string, field: keyof LanguageItem, value: string) => void;
   onRemoveLanguage: (id: string) => void;
+
+  // Curation props
+  activeMode?: ViewMode;
+  activeJob?: CuratedJobResume | null;
+  onToggleItemInclusion?: (section: 'experience' | 'projects' | 'education' | 'certificates', id: string) => void;
+  onToggleTailoredText?: (section: 'experience' | 'projects', id: string) => void;
 }
 
 interface OpenSections {
@@ -41,6 +63,7 @@ interface OpenSections {
   objective: boolean;
   experience: boolean;
   education: boolean;
+  projects: boolean;
   certificates: boolean;
   skills: boolean;
   languages: boolean;
@@ -61,6 +84,10 @@ export default function CVEditor({
   onUpdateEducation,
   onRemoveEducation,
   onMoveEducation,
+  onAddProject,
+  onUpdateProject,
+  onRemoveProject,
+  onMoveProject,
   onAddCertificate,
   onUpdateCertificate,
   onRemoveCertificate,
@@ -69,17 +96,22 @@ export default function CVEditor({
   onRemoveSkill,
   onAddLanguage,
   onUpdateLanguage,
-  onRemoveLanguage
+  onRemoveLanguage,
+  activeMode = 'master',
+  activeJob = null,
+  onToggleItemInclusion,
+  onToggleTailoredText
 }: CVEditorProps) {
   const [openSections, setOpenSections] = useState<OpenSections>({
     personal: true,
     objective: false,
-    experience: false,
+    experience: true,
     education: false,
+    projects: true,
     certificates: false,
     skills: false,
     languages: false,
-    style: true
+    style: false
   });
 
   const toggleSection = (section: keyof OpenSections) => {
@@ -89,8 +121,52 @@ export default function CVEditor({
     }));
   };
 
+  const isCurated = activeMode === 'curated' && Boolean(activeJob);
+
   return (
     <aside className="cv-editor no-print" style={style}>
+      {/* CURATION MODE BANNER */}
+      {isCurated && activeJob ? (
+        <div className="curation-editor-banner">
+          <div className="curation-banner-top">
+            <div className="curation-banner-role">
+              <span>🎯 Vaga: {activeJob.job.roleTitle}</span>
+              {activeJob.job.company && <small style={{ opacity: 0.7 }}>({activeJob.job.company})</small>}
+            </div>
+            <div className="curation-banner-badges">
+              <span className="curation-banner-score">{activeJob.curation.matchScore}% Match ATS</span>
+              <span className="curation-a4-tag">1 Página A4</span>
+            </div>
+          </div>
+          <div className="curation-safety-tag">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>Edição isolada: as alterações nesta bagagem não alteram a sua Bagagem Mestra.</span>
+          </div>
+          <p className="curation-banner-helper">
+            {activeJob.curation.tailoredObjective}
+          </p>
+          {activeJob.curation.matchedKeywords.length > 0 && (
+            <div className="curation-kw-chips">
+              {activeJob.curation.matchedKeywords.slice(0, 8).map(kw => (
+                <span key={kw} className="curation-kw-chip">✓ {kw}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="master-editor-banner">
+          <div className="master-banner-left">
+            <span className="master-emoji">💼</span>
+            <div className="master-banner-text">
+              <strong>Bagagem Mestra Ativa</strong>
+              <small>Seu histórico completo. Todas as novas vagas utilizam esta base.</small>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 1. VISUAL & ESTILO */}
       <FormSection
         title="Visual & Estilo"
@@ -153,6 +229,9 @@ export default function CVEditor({
           onUpdateExperience={onUpdateExperience}
           onRemoveExperience={onRemoveExperience}
           onMoveExperience={onMoveExperience}
+          curationMap={isCurated ? activeJob?.curation.experience : undefined}
+          onToggleInclusion={(id) => onToggleItemInclusion?.('experience', id)}
+          onToggleTailoredText={(id) => onToggleTailoredText?.('experience', id)}
         />
       </FormSection>
 
@@ -174,10 +253,36 @@ export default function CVEditor({
           onUpdateEducation={onUpdateEducation}
           onRemoveEducation={onRemoveEducation}
           onMoveEducation={onMoveEducation}
+          curationMap={isCurated ? activeJob?.curation.education : undefined}
+          onToggleInclusion={(id) => onToggleItemInclusion?.('education', id)}
         />
       </FormSection>
 
-      {/* 6. CERTIFICADOS */}
+      {/* 6. PROJETOS PESSOAIS */}
+      <FormSection
+        title="Projetos Pessoais"
+        isOpen={openSections.projects}
+        onToggle={() => toggleSection('projects')}
+        icon={
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        }
+      >
+        <ProjectsForm 
+          projectsList={data.projects || []}
+          onAddProject={onAddProject}
+          onUpdateProject={onUpdateProject}
+          onRemoveProject={onRemoveProject}
+          onMoveProject={onMoveProject}
+          curationMap={isCurated ? activeJob?.curation.projects : undefined}
+          onToggleInclusion={(id) => onToggleItemInclusion?.('projects', id)}
+          onToggleTailoredText={(id) => onToggleTailoredText?.('projects', id)}
+        />
+      </FormSection>
+
+      {/* 7. CERTIFICADOS */}
       <FormSection
         title="Certificados"
         isOpen={openSections.certificates}
@@ -195,10 +300,12 @@ export default function CVEditor({
           onUpdateCertificate={onUpdateCertificate}
           onRemoveCertificate={onRemoveCertificate}
           onMoveCertificate={onMoveCertificate}
+          curationMap={isCurated ? activeJob?.curation.certificates : undefined}
+          onToggleInclusion={(id) => onToggleItemInclusion?.('certificates', id)}
         />
       </FormSection>
 
-      {/* 7. COMPETÊNCIAS / SKILLS */}
+      {/* 8. COMPETÊNCIAS / SKILLS */}
       <FormSection
         title="Competências (Skills)"
         isOpen={openSections.skills}
@@ -216,7 +323,7 @@ export default function CVEditor({
         />
       </FormSection>
 
-      {/* 8. IDIOMAS */}
+      {/* 9. IDIOMAS */}
       <FormSection
         title="Idiomas"
         isOpen={openSections.languages}

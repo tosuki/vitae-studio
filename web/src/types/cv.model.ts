@@ -27,6 +27,16 @@ export interface EducationItem {
   description: string;
 }
 
+export interface ProjectItem {
+  id: string;
+  name: string;
+  role: string;
+  link: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
 export interface CertificateItem {
   id: string;
   name: string;
@@ -54,8 +64,49 @@ export interface CVData {
   objective: string;
   experience: ExperienceItem[];
   education: EducationItem[];
+  projects: ProjectItem[];
   certificates: CertificateItem[];
   skills: string[];
   languages: LanguageItem[];
   style: StyleConfig;
 }
+
+export type MasterProfile = CVData;
+
+export interface ItemCuration {
+  included: boolean;
+  relevanceScore?: number;
+  tailoredDescription?: string;
+  useTailoredText?: boolean;
+}
+
+export interface TargetedCuration {
+  jobTitle: string;
+  company?: string;
+  matchScore: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  tailoredTitle?: string;
+  tailoredObjective: string;
+  experience: Record<string, ItemCuration>;
+  projects: Record<string, ItemCuration>;
+  education: Record<string, ItemCuration>;
+  certificates: Record<string, ItemCuration>;
+  selectedSkills: string[];
+}
+
+export interface JobTarget {
+  id: string;
+  roleTitle: string;
+  company?: string;
+  jobDescription: string;
+  createdAt: number;
+}
+
+export interface CuratedJobResume {
+  job: JobTarget;
+  curation: TargetedCuration;
+  cv?: CVData;
+}
+
+export type ViewMode = 'master' | 'curated';

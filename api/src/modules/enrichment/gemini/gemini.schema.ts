@@ -109,6 +109,45 @@ export const EducationItemResponseSchema = {
     }
 }
 
+export const ProjectItemResponseSchema = {
+    type: Type.ARRAY,
+    description: "Projetos pessoais e portfólio",
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            id: {
+                type: Type.STRING,
+                description: "Copie exatamente o ID recebido no currículo original ou gere sequencialmente"
+            },
+            name: {
+                type: Type.STRING,
+                description: "Nome do projeto"
+            },
+            role: {
+                type: Type.STRING,
+                description: "Função ou principais tecnologias utilizadas no projeto"
+            },
+            link: {
+                type: Type.STRING,
+                description: "Link do projeto, repositório ou deploy sem protocolo (ex: github.com/user/project)"
+            },
+            startDate: {
+                type: Type.STRING,
+                description: "Data de início (Mês/Ano ou Ano)"
+            },
+            endDate: {
+                type: Type.STRING,
+                description: "Data de término ou em branco se contínuo"
+            },
+            description: {
+                type: Type.STRING,
+                description: "Descrição, objetivos e conquistas do projeto"
+            }
+        },
+        required: ["id", "name", "role", "link", "startDate", "endDate", "description"]
+    }
+}
+
 export const CertificateItemResponseSchema = {
     type: Type.ARRAY,
     description: "Certificados",
@@ -178,9 +217,10 @@ export const CVResponseSchema = {
         },
         experience: ExperienceItemResponseSchema,
         education: EducationItemResponseSchema,
+        projects: ProjectItemResponseSchema,
         certificates: CertificateItemResponseSchema,
         skills: SkillsItemResponseSchema,
         languages: LanguageItemResponseSchema,
     },
-    required: ["personal", "objective", "experience", "education", "certificates", "skills", "languages"]
+    required: ["personal", "objective", "experience", "education", "projects", "certificates", "skills", "languages"]
 }

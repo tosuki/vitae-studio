@@ -3,7 +3,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { TaskController } from "./controllers/task.controller";
 import { SettingsController } from "./controllers/settings.controller";
 
-import { createTaskSchema, getTaskSchema } from "./schema/task.schema";
+import { createTaskSchema, getTaskSchema, parseResumeTaskSchema, curateTaskSchema } from "./schema/task.schema";
 import {
     getSettingsSchema,
     listSettingsModelsSchema,
@@ -24,6 +24,8 @@ const router: FastifyPluginAsync = async (fastify) => {
     });
 
     typedFastify.post('/tasks', { schema: createTaskSchema }, controller.create.bind(controller));
+    typedFastify.post('/tasks/curate', { schema: curateTaskSchema }, controller.curate.bind(controller));
+    typedFastify.post('/tasks/parse-resume', { schema: parseResumeTaskSchema }, controller.parseResume.bind(controller));
     typedFastify.get('/tasks/:id', { schema: getTaskSchema }, controller.get.bind(controller));
 
     typedFastify.get('/settings', { schema: getSettingsSchema }, settingsController.get.bind(settingsController));

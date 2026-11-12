@@ -1,5 +1,6 @@
 import { useRef, ChangeEvent } from 'react';
-import { CVData } from '../types/cv.model';
+import { CVData, CuratedJobResume, ViewMode } from '../types/cv.model';
+import BaggageMenu from './baggage-menu/baggage-menu.component';
 import './navbar.component.css';
 
 interface NavbarProps {
@@ -7,12 +8,22 @@ interface NavbarProps {
   onClear: () => void;
   onExportJson: () => void;
   onImportJson: (data: CVData) => void;
+  onOpenResumeUpload: () => void;
   onPrint: () => void;
   onAlert: (title: string, message: string) => void;
   onOpenEnrichment: () => void;
   onOpenAtsValidation: () => void;
   onOpenSettings: () => void;
   isAIConfigured?: boolean;
+
+  // New Curation Context props
+  activeMode: ViewMode;
+  savedJobs: CuratedJobResume[];
+  activeJobId: string | null;
+  onSelectMaster: () => void;
+  onSelectJob: (jobId: string) => void;
+  onRemoveJob: (jobId: string) => void;
+  onOpenCurateJob: () => void;
 }
 
 export default function Navbar({
@@ -20,12 +31,20 @@ export default function Navbar({
   onClear,
   onExportJson,
   onImportJson,
+  onOpenResumeUpload,
   onPrint,
   onAlert,
   onOpenEnrichment,
   onOpenAtsValidation,
   onOpenSettings,
-  isAIConfigured = false
+  isAIConfigured = false,
+  activeMode,
+  savedJobs,
+  activeJobId,
+  onSelectMaster,
+  onSelectJob,
+  onRemoveJob,
+  onOpenCurateJob
 }: NavbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,7 +60,6 @@ export default function Navbar({
           const data = JSON.parse(result) as CVData;
           onImportJson(data);
         }
-        // Reset file input value so same file can be selected again
         event.target.value = '';
       } catch {
         onAlert(
@@ -66,6 +84,18 @@ export default function Navbar({
         <span className="navbar-title">Vitae <span className="badge">Studio</span></span>
       </div>
 
+      {/* CONTEXT SWITCHER: MASTER PROFILE VS CURATED JOB RESUMES */}
+      <BaggageMenu
+        activeMode={activeMode}
+        savedJobs={savedJobs}
+        activeJobId={activeJobId}
+        onSelectMaster={onSelectMaster}
+        onSelectJob={onSelectJob}
+        onRemoveJob={onRemoveJob}
+        onOpenCurateJob={onOpenCurateJob}
+        onOpenLinkedinEnrichment={onOpenEnrichment}
+      />
+
       <div className="navbar-actions">
         <div className="action-group">
           <button
@@ -84,10 +114,25 @@ export default function Navbar({
           <button
             type="button"
             className="btn btn-secondary"
+            onClick={onOpenResumeUpload}
+            title="Importar e extrair currículo a partir de arquivo PDF ou TXT usando IA"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <path d="M12 18v-6"></path>
+              <path d="m9 15 3-3 3 3"></path>
+            </svg>
+            Importar PDF/TXT
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
             onClick={onOpenEnrichment}
             title="Otimizar currículo para vaga do LinkedIn com IA"
           >
-            Enriquecer
+            LinkedIn
           </button>
 
           <button
@@ -110,13 +155,7 @@ export default function Navbar({
             onClick={onLoadSample}
             title="Preencher com dados fictícios profissionais"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="12" y1="18" x2="12" y2="12"></line>
-              <line x1="9" y1="15" x2="15" y2="15"></line>
-            </svg>
-            Carregar Exemplo
+            Exemplo
           </button>
 
           <button
@@ -125,10 +164,6 @@ export default function Navbar({
             onClick={onClear}
             title="Limpar todos os campos do currículo"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
             Limpar
           </button>
         </div>
@@ -140,12 +175,7 @@ export default function Navbar({
             onClick={() => fileInputRef.current?.click()}
             title="Importar dados de um arquivo JSON"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            Importar JSON
+            Importar
           </button>
           <input
             type="file"
@@ -161,12 +191,7 @@ export default function Navbar({
             onClick={onExportJson}
             title="Exportar dados atuais do currículo como arquivo JSON"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Exportar JSON
+            Exportar
           </button>
         </div>
 
@@ -174,7 +199,7 @@ export default function Navbar({
           type="button"
           className="btn btn-primary"
           onClick={onPrint}
-          title="Imprimir ou Salvar currículo como PDF"
+          title="Imprimir ou Salvar currículo como PDF de 1 página"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 6 2 18 2 18 9"></polyline>

@@ -19,16 +19,16 @@
   box-sizing: border-box;
   background-color: #ffffff;
   color: #1e293b;
-  width: 793px; /* A4 width at 96 DPI */
-  min-height: 1120px; /* A4 height at 96 DPI */
-  padding: calc(30px * var(--preview-spacing-multiplier)) calc(40px * var(--preview-spacing-multiplier));
+  width: 210mm; /* Exact physical A4 width */
+  min-height: 297mm; /* Exact physical A4 height */
+  padding: 12mm 14mm; /* Identical 1:1 to @page print margins */
   box-shadow: var(--sheet-shadow);
   display: flex;
   flex-direction: column;
-  gap: calc(16px * var(--preview-spacing-multiplier));
+  gap: calc(15px * var(--preview-spacing-multiplier));
   border: 1px solid #cbd5e1;
   text-align: left;
-  line-height: 1.45;
+  line-height: var(--preview-line-height, 1.42);
 }
 
 /* CV FONTS */
@@ -125,14 +125,16 @@
 
 /* EXPERIENCE & EDUCATION ITEMS */
 .experience-list,
-.education-list {
+.education-list,
+.projects-list {
   display: flex;
   flex-direction: column;
   gap: calc(14px * var(--preview-spacing-multiplier));
 }
 
 .cv-experience-item,
-.cv-education-item {
+.cv-education-item,
+.cv-project-item {
   display: flex;
   flex-direction: column;
   gap: calc(4px * var(--preview-spacing-multiplier));
@@ -183,6 +185,18 @@
   color: #cbd5e1;
 }
 
+.cv-project-link {
+  color: var(--preview-accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+
+.cv-project-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
 .cv-item-description {
   font-size: 0.82rem;
   color: #334155;
@@ -195,12 +209,12 @@
   display: list-item;
   list-style-type: square;
   margin-left: 14px;
-  line-height: 1.4;
+  line-height: var(--preview-line-height, 1.38);
 }
 
 .cv-text-paragraph {
   margin: 0;
-  line-height: 1.45;
+  line-height: var(--preview-line-height, 1.42);
 }
 
 .cv-item-description-text {
@@ -429,6 +443,45 @@
   display: flex;
   flex-direction: column;
   gap: calc(6px * var(--preview-spacing-multiplier));
+}
+
+/* A4 PAGE LIMIT INDICATOR */
+.cv-preview-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.a4-page-indicator {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+}
+
+.a4-page-indicator.perfect {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.a4-page-indicator.overflow {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  animation: pulseOverflow 2s infinite;
+}
+
+@keyframes pulseOverflow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 /* Skills display in ATS theme: clean text list with subtle borders / pills */
